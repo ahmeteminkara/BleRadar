@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AndroidLogFilters">
+    <option name="TOOL_WINDOW_CUSTOM_FILTER" value="BleScanner" />
+    <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="Show only selected application" />
+    <option name="TOOL_WINDOW_REGEXP_FILTER" value="false" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="6f3c793a-32a3-48fe-9677-62dd7ef6188e" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[42004047070fc539]" />
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Dart File" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectId" id="1nI41xOuWcUxSjceh6q8i0Hqkc0" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="dart.analysis.tool.window.force.activate" value="true" />
+    <property name="dart.analysis.tool.window.visible" value="false" />
+    <property name="io.flutter.reload.alreadyRun" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/android" />
+    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.proportion" value="0.17" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="show.migrate.to.gradle.popup" value="false" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/android" />
+    </key>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="6f3c793a-32a3-48fe-9677-62dd7ef6188e" name="Default Changelist" comment="" />
+      <created>1611064059529</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1611064059529</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="1851" y="-68" key="#PSD" timestamp="1611638318526">
+      <screen x="1366" y="-335" width="1920" height="1057" />
+    </state>
+    <state x="1851" y="-68" key="#PSD/1366.-335.1920.1057/0.23.1366.687@1366.-335.1920.1057" timestamp="1611638318526" />
+    <state x="2215" y="-145" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1611646730511">
+      <screen x="1366" y="-335" width="1920" height="1057" />
+    </state>
+    <state x="2215" y="-145" key="#com.intellij.execution.impl.EditConfigurationsDialog/1366.-335.1920.1057/0.23.1366.687@1366.-335.1920.1057" timestamp="1611646730511" />
+    <state x="2564" y="-53" key="AndroidProcessChooserDialog" timestamp="1611651441735">
+      <screen x="1366" y="-335" width="1920" height="1057" />
+    </state>
+    <state x="2564" y="-53" key="AndroidProcessChooserDialog/1366.-335.1920.1057/0.23.1366.687@1366.-335.1920.1057" timestamp="1611651441735" />
+    <state width="857" height="337" key="GridCell.Tab.0.bottom" timestamp="1611665935821">
+      <screen x="1366" y="-335" width="1920" height="1057" />
+    </state>
+    <state width="857" height="337" key="GridCell.Tab.0.bottom/1366.-335.1920.1057/0.23.1366.687@1366.-335.1920.1057" timestamp="1611665935821" />
+    <state width="857" height="337" key="GridCell.Tab.0.center" timestamp="1611665935820">
+      <screen x="1366" y="-335" width="1920" height="1057" />
+    </state>
+    <state width="857" height="337" key="GridCell.Tab.0.center/1366.-335.1920.1057/0.23.1366.687@1366.-335.1920.1057" timestamp="1611665935820" />
+    <state width="857" height="337" key="GridCell.Tab.0.left" timestamp="1611665935820">
+      <screen x="1366" y="-335" width="1920" height="1057" />
+    </state>
+    <state width="857" height="337" key="GridCell.Tab.0.left/1366.-335.1920.1057/0.23.1366.687@1366.-335.1920.1057" timestamp="1611665935820" />
+    <state width="857" height="337" key="GridCell.Tab.0.right" timestamp="1611665935821">
+      <screen x="1366" y="-335" width="1920" height="1057" />
+    </state>
+    <state width="857" height="337" key="GridCell.Tab.0.right/1366.-335.1920.1057/0.23.1366.687@1366.-335.1920.1057" timestamp="1611665935821" />
+    <state x="1660" y="-235" width="1526" height="857" key="com.intellij.history.integration.ui.views.FileHistoryDialog" timestamp="1611642673722">
+      <screen x="1366" y="-335" width="1920" height="1057" />
+    </state>
+    <state x="1660" y="-235" width="1526" height="857" key="com.intellij.history.integration.ui.views.FileHistoryDialog/1366.-335.1920.1057/0.23.1366.687@1366.-335.1920.1057" timestamp="1611642673722" />
+    <state x="2468" y="44" key="edit.logcat.filter.dialog.dimensions" timestamp="1611645728209">
+      <screen x="1366" y="-335" width="1920" height="1057" />
+    </state>
+    <state x="2468" y="44" key="edit.logcat.filter.dialog.dimensions/1366.-335.1920.1057/0.23.1366.687@1366.-335.1920.1057" timestamp="1611645728209" />
+    <state x="2464" y="-100" width="670" height="676" key="search.everywhere.popup" timestamp="1611643576938">
+      <screen x="1366" y="-335" width="1920" height="1057" />
+    </state>
+    <state x="2464" y="-100" width="670" height="676" key="search.everywhere.popup/1366.-335.1920.1057/0.23.1366.687@1366.-335.1920.1057" timestamp="1611643576938" />
+  </component>
+</project>

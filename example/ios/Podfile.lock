@@ -1,0 +1,28 @@
+PODS:
+  - ble_radar (0.0.1):
+    - Flutter
+  - Flutter (1.0.0)
+  - screen (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - ble_radar (from `.symlinks/plugins/ble_radar/ios`)
+  - Flutter (from `Flutter`)
+  - screen (from `.symlinks/plugins/screen/ios`)
+
+EXTERNAL SOURCES:
+  ble_radar:
+    :path: ".symlinks/plugins/ble_radar/ios"
+  Flutter:
+    :path: Flutter
+  screen:
+    :path: ".symlinks/plugins/screen/ios"
+
+SPEC CHECKSUMS:
+  ble_radar: c043bdac5b5e23e2a76522eba3abf1e26091389c
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  screen: a5240c4c8bb3a528178db445cdcec03b8a095052
+
+PODFILE CHECKSUM: 88c2509cc84b6dfbef81d5e69596b84899b6998a
+
+COCOAPODS: 1.9.3
