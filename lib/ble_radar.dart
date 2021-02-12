@@ -14,7 +14,6 @@ class BleRadar {
 
   BleRadar(this.context, {this.uuidFilterList = const []}) {
     Screen.keepOn(true);
-
     _loadListeners();
   }
 
@@ -68,7 +67,7 @@ class BleRadar {
 
   final MethodChannel _channel = const MethodChannel('ble_radar');
 
-  Future<void> start({
+  Future start({
     @required int maxRssi,
     @required bool autoConnect,
     bool vibration = true,
@@ -98,13 +97,12 @@ class BleRadar {
     return await _channel.invokeMethod("getServices");
   }
 
-
   Future<List<String>> getCharacteristics(String serviceUUID) async {
-    return await _channel.invokeMethod("getCharacteristics",{"serviceUUID":serviceUUID});
+    return await _channel.invokeMethod("getCharacteristics", {"serviceUUID": serviceUUID});
   }
 
-  Future<void> writeCharacteristic(String serviceUUID, String characteristicUUID, String data) async {
-    await _channel.invokeMethod("writeCharacteristic", {
+  Future<bool> writeCharacteristic(String serviceUUID, String characteristicUUID, String data) async {
+    return await _channel.invokeMethod("writeCharacteristic", {
       "serviceUUID": serviceUUID,
       "characteristicUUID": characteristicUUID,
       "data": data,

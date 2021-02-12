@@ -24,7 +24,7 @@ public class DeviceControls {
      * @param activity
      */
     public static boolean isOpenBluetooth(Activity activity) {
-        
+
         BluetoothManager bluetoothManager = (BluetoothManager)
                 activity.getApplicationContext().getSystemService(Context.BLUETOOTH_SERVICE);
         BluetoothAdapter bluetoothAdapter = bluetoothManager.getAdapter();
@@ -46,7 +46,7 @@ public class DeviceControls {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             LocationManager lm = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
-            status = lm.isLocationEnabled();
+            status = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
         } else {
             int mode = Settings.Secure.getInt(activity.getContentResolver(), Settings.Secure.LOCATION_MODE,
                     Settings.Secure.LOCATION_MODE_OFF);
@@ -80,7 +80,6 @@ public class DeviceControls {
     public static boolean checkSetting(
             Activity activity,
             BleScannerErrorCallback errorCallback) {
-
 
 
         if (!isOpenBluetooth(activity)) {

@@ -15,8 +15,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
-import android.os.Handler;
-import android.os.Looper;
+import android.os.Build;
 import android.os.ParcelUuid;
 import android.util.Log;
 import android.widget.Toast;
@@ -40,7 +39,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -71,14 +69,24 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
 
     private boolean isScanning = false;
 
-    private int maxRssi = 0;
-    private boolean vibration = true;
     private boolean autoConnect = false;
 
-    private List<String> listFilterUUID = new ArrayList<>();
+    private final List<String> listFilterUUID = new ArrayList<>();
+
+    public boolean permissionOK() {
+
+        if (activity == null) {
+            Log.e(BleScanner.TAG, "Activity is null permissionOK");
+            return false;
+        }
+        boolean status = DeviceControls.checkSetting(this.activity, this.errorCallback);
+        if (status)
+            prepareBleScanner();
+
+        return status;
+    }
 
     public void prepareBleScanner() {
-
         if (activity == null) {
             Log.e(BleScanner.TAG, "Activity is null");
         }
@@ -91,30 +99,16 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
                     .setServiceUuid(ParcelUuid.fromString(uuid)).build());
         }
 
-        Log.e(BleScanner.TAG, "filterList.size: " + filterList.size());
-
-        ScanSettings scanSettings = new ScanSettings.Builder()
-                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                .build();
-
-        BleScannerErrorCallback errorCallback = new BleScannerErrorCallback() {
-            @Override
-            public void onDeviceError(BleDeviceErrors deviceError) {
-                Log.e(BleScanner.TAG, "onDeviceError: " + deviceError);
-
-            }
-
-            @Override
-            public void onScanError(BleScanErrors scanError) {
-                Log.e(BleScanner.TAG, "scanError: " + scanError);
-            }
-        };
+        ScanSettings.Builder scanSettingsBuilder = new ScanSettings.Builder();
+        scanSettingsBuilder.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            scanSettingsBuilder.setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE);
 
 
         bleScanner = new BleScanner(
                 activity,
                 filterList,
-                scanSettings,
+                scanSettingsBuilder.build(),
                 scannerCallback,
                 serviceCallback,
                 errorCallback);
@@ -138,6 +132,20 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
         );
 
     }
+
+
+    BleScannerErrorCallback errorCallback = new BleScannerErrorCallback() {
+        @Override
+        public void onDeviceError(BleDeviceErrors deviceError) {
+            Log.e(BleScanner.TAG, "onDeviceError: " + deviceError);
+
+        }
+
+        @Override
+        public void onScanError(BleScanErrors scanError) {
+            Log.e(BleScanner.TAG, "scanError: " + scanError);
+        }
+    };
 
     EventSink eventSinkScanningStatus;
     EventSink eventSinkDetectDevice;
@@ -167,11 +175,13 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
                             case 10:
                             case 12:
                                 boolean isOpen = DeviceControls.isOpenBluetooth(activity);
-                                if (isOpen) {
-                                    bleScanner.startScan(maxRssi, vibration);
+                                /*if (isOpen) {
+                                    bleScanner.startScan(maxRssi, vibration, autoConnect);
                                 } else {
                                     bleScanner.stop();
                                 }
+
+                                 */
                                 events.success(isOpen);
                                 break;
 
@@ -221,7 +231,6 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
             @Override
             public void onListen(Object arguments, EventSink events) {
                 Log.e(BleScanner.TAG, "scanning status onListen");
-
                 eventSinkScanningStatus = events;
             }
 
@@ -309,22 +318,24 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
                                 && call.hasArgument("vibration")
                                 && call.hasArgument("filterUUID")
                 ) {
+
+                    if (!permissionOK()) {
+                        return;
+                    }
+
                     try {
 
-                        maxRssi = call.argument("maxRssi");
-                        vibration = call.argument("vibration");
+                        int maxRssi = call.argument("maxRssi");
+                        boolean vibration = call.argument("vibration");
                         autoConnect = call.argument("autoConnect");
 
                         final List<String> paramsFilter = call.argument("filterUUID");
 
-                        //JSONArray jsonArray = new JSONArray(paramsFilter);
-                        Log.e(BleScanner.TAG, Arrays.toString(paramsFilter.toArray()));
-
+                        listFilterUUID.clear();
                         listFilterUUID.addAll(paramsFilter);
 
 
-                        prepareBleScanner();
-                        bleScanner.startScan(maxRssi, vibration);
+                        bleScanner.startScan(maxRssi, vibration, autoConnect);
                     } catch (Exception e) {
                         Log.e("startScanAA", e.getMessage());
                     }
@@ -332,12 +343,14 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
                 }
                 break;
             case "stopScan":
+                Log.e(BleScanner.TAG, "flutter dan STOP geldi");
                 bleScanner.stop();
                 break;
             case "connectDevice":
                 bleScanner.connectDevice();
                 break;
             case "disconnectDevice":
+                Log.e(BleScanner.TAG, "Flutter -> disconnectDevice");
                 bleScanner.disconnect();
                 break;
             case "getServices":
@@ -369,25 +382,31 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
                     BluetoothGattCharacteristic gattCharacteristic = gattService.getCharacteristic(UUID.fromString(characteristicUUID));
 
                     bleScanner.readCharacteristic(gattCharacteristic);
-
-
                 }
                 break;
             case "writeCharacteristic":
-                if (call.hasArgument("data")
-                        && call.hasArgument("characteristicUUID")
-                        && call.hasArgument("serviceUUID")) {
+                try {
 
-                    String data = call.argument("data"),
-                            characteristicUUID = call.argument("characteristicUUID"),
-                            serviceUUID = call.argument("serviceUUID");
+                    if (call.hasArgument("data")
+                            && call.hasArgument("characteristicUUID")
+                            && call.hasArgument("serviceUUID")) {
 
-                    BluetoothGattService gattService = bleScanner.getService(serviceUUID);
-                    BluetoothGattCharacteristic gattCharacteristic = gattService.getCharacteristic(UUID.fromString(characteristicUUID));
+                        String data = call.argument("data"),
+                                characteristicUUID = call.argument("characteristicUUID"),
+                                serviceUUID = call.argument("serviceUUID");
 
-                    boolean status = bleScanner.writeCharacteristic(gattCharacteristic, data);
+                        BluetoothGattService gattService = bleScanner.getService(serviceUUID);
+                        BluetoothGattCharacteristic gattCharacteristic = gattService.getCharacteristic(UUID.fromString(characteristicUUID));
+
+                        boolean status = bleScanner.writeCharacteristic(gattCharacteristic, data);
+                        result.success(status);
 
 
+
+                    } else {
+                    }
+                } catch (Exception e) {
+                    Log.e(BleScanner.TAG, "writeCharacteristic error: " + e.toString());
                 }
                 break;
             default:
@@ -410,7 +429,7 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
         public void onScanning(boolean status) {
             String timeStamp = new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime());
 
-            Log.d(BleScanner.TAG, "onScanning: " + status + " - " + timeStamp);
+            //Log.d(BleScanner.TAG, "onScanning: " + status + " - " + timeStamp);
             isScanning = status;
             if (eventSinkScanningStatus != null)
                 activity.runOnUiThread(() -> eventSinkScanningStatus.success(status));
@@ -428,7 +447,8 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
 
                     Log.d(BleScanner.TAG, "onDetect: " + json.toString());
 
-                    activity.runOnUiThread(() -> eventSinkDetectDevice.success(json.toString()));
+                    if (eventSinkDetectDevice != null)
+                        activity.runOnUiThread(() -> eventSinkDetectDevice.success(json.toString()));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -439,8 +459,8 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
 
         @Override
         public void onConnectDevice(boolean isConnected, BluetoothDevice device) {
-            Log.d(BleScanner.TAG, "isConnected: " + isConnected);
-            activity.runOnUiThread(() -> eventSinkConnectedDevice.success(isConnected));
+            if (eventSinkConnectedDevice != null)
+                activity.runOnUiThread(() -> eventSinkConnectedDevice.success(isConnected));
         }
 
     };
@@ -456,7 +476,8 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
                     for (BluetoothGattService gattService : list) {
                         json.put(gattService.getUuid().toString());
                     }
-                    activity.runOnUiThread(() -> eventSinkServicesDiscovered.success(json.toString()));
+                    if (eventSinkServicesDiscovered != null)
+                        activity.runOnUiThread(() -> eventSinkServicesDiscovered.success(json.toString()));
                 } catch (Exception e) {
 
                 }
@@ -474,25 +495,8 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
                                          String data) {
 
             Log.d(BleScanner.TAG, "onCharacteristicRead -> data: " + data);
-            activity.runOnUiThread(() -> eventSinkReadCharacteristic.success(data));
-/*
-            if (status) {
-
-                if (serviceUUID.equals(uuidServiceCryptoApiUrl)) {
-                    cryptoCharsList.remove(characteristic);
-                    cryptoCharsValues.add(data);
-                    readCryptoApi();
-                } else if (serviceUUID.equals(uuidServiceUserControl)) {
-
-                    Log.d(BleScanner.TAG, "uuidServiceUserControl: "
-                            + characteristic.getUuid().toString() + " -> " + data);
-
-                }
-            } else {
-                Log.e(BleScanner.TAG, "onCharacteristicRead -> status: " + false);
-            }
-
- */
+            if (eventSinkReadCharacteristic != null)
+                activity.runOnUiThread(() -> eventSinkReadCharacteristic.success(data));
         }
 
         @Override
@@ -502,9 +506,8 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
             } else {
                 Log.e(BleScanner.TAG, "onCharacteristicWrite failed");
             }
-            activity.runOnUiThread(() -> {
-                eventSinkWriteCharacteristic.success(status);
-            });
+            if (eventSinkWriteCharacteristic != null)
+                activity.runOnUiThread(() -> eventSinkWriteCharacteristic.success(status));
         }
     };
 
@@ -514,7 +517,7 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
         Log.e(BleScanner.TAG, "onAttachedToActivity");
         this.activity = binding.getActivity();
 
-        prepareBleScanner();
+        permissionOK();
 
         binding.addActivityResultListener(this);
         binding.addRequestPermissionsResultListener(this);
@@ -548,7 +551,7 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
 
         if (requestCode == BleScanner.bluetoothRequestCode) {
             if (resultCode == Activity.RESULT_OK) {
-                activity.runOnUiThread(this::prepareBleScanner);
+                activity.runOnUiThread(this::permissionOK);
                 Toast.makeText(activity, "Bluetooth açıldı", Toast.LENGTH_SHORT).show();
             } else {
                 final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
@@ -556,7 +559,7 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
                 builder.setMessage("Bu uygulamanın çevre birimlerini" +
                         " algılayabilmesi için lütfen Bluetooth'u açınız");
                 builder.setPositiveButton(android.R.string.ok, null);
-                builder.setOnDismissListener(dialog -> activity.runOnUiThread(this::prepareBleScanner));
+                builder.setOnDismissListener(dialog -> activity.runOnUiThread(this::permissionOK));
                 builder.show();
 
             }
@@ -564,7 +567,7 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
 
             Log.e(BleScanner.TAG, "locationRequestCode: " + resultCode);
             if (DeviceControls.isOpenLocation(activity)) {
-                activity.runOnUiThread(this::prepareBleScanner);
+                activity.runOnUiThread(this::permissionOK);
                 Toast.makeText(activity, "Konum açıldı", Toast.LENGTH_SHORT).show();
             } else {
                 final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
@@ -572,7 +575,7 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
                 builder.setMessage("Bu uygulamanın çevre birimlerini" +
                         " algılayabilmesi için lütfen konumu açınız");
                 builder.setPositiveButton(android.R.string.ok, null);
-                builder.setOnDismissListener(dialog -> activity.runOnUiThread(this::prepareBleScanner));
+                builder.setOnDismissListener(dialog -> activity.runOnUiThread(this::permissionOK));
                 builder.show();
             }
 
@@ -584,17 +587,20 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
     public boolean onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         Log.e(BleScanner.TAG, "onRequestPermissionsResult");
         if (requestCode == BleScanner.locationRequestCode) {
+
+
             if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
 
                 final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
                 builder.setTitle("Konum erişimi reddedildi");
                 builder.setMessage("Konum erişimi izni vermeniz gerekmektedir");
                 builder.setPositiveButton(android.R.string.ok, null);
-                builder.setOnDismissListener(dialog -> activity.runOnUiThread(this::prepareBleScanner));
+                builder.setOnDismissListener(dialog -> activity.runOnUiThread(this::permissionOK));
                 builder.show();
             } else {
-                activity.runOnUiThread(this::prepareBleScanner);
+                activity.runOnUiThread(this::permissionOK);
             }
+
         }
         return false;
     }

@@ -49,13 +49,13 @@ public class BleScanner extends Executor {
 
         this.activity = activity;
         this.errorCallback = errorCallback;
-
         if (!DeviceControls.checkSetting(this.activity, this.errorCallback)) return;
+
     }
 
-    public void startScan(int maxRssi, boolean vibration) {
+    public void startScan(int maxRssi, boolean vibration, boolean autoConnect) {
         if (!DeviceControls.checkSetting(this.activity, this.errorCallback)) return;
-        super.start(maxRssi, vibration);
+        super.start(maxRssi, vibration, autoConnect);
     }
 
     public BluetoothGattService getService(String uuid) {
@@ -68,7 +68,7 @@ public class BleScanner extends Executor {
 
     public List<String> getServicesList() {
         try {
-            List<String> list  = new ArrayList<>();
+            List<String> list = new ArrayList<>();
             for (BluetoothGattService service : super.bluetoothGatt.getServices()) {
                 list.add(service.getUuid().toString());
             }
@@ -83,7 +83,7 @@ public class BleScanner extends Executor {
         try {
             BluetoothGattService service = this.getService(serviceUUID);
 
-            List<String> list  = new ArrayList<>();
+            List<String> list = new ArrayList<>();
             for (BluetoothGattCharacteristic characteristic : service.getCharacteristics()) {
                 list.add(characteristic.getUuid().toString());
             }

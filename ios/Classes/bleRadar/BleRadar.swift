@@ -60,7 +60,7 @@ class BleRadar:NSObject, CBCentralManagerDelegate,CBPeripheralDelegate {
     }
     
     func startScan(filter:[CBUUID] = [],maxRssi:Int32) {
-        print("Started Scan")
+       print("BleRadar -> Started Scan")
         if !isActivedBluetooth {
             return
         }
@@ -74,7 +74,7 @@ class BleRadar:NSObject, CBCentralManagerDelegate,CBPeripheralDelegate {
     }
     
     func stopScan(){
-        print("Stoped Scan")
+       print("BleRadar -> Stoped Scan")
         centralManager.stopScan()
         isScanning = false
         delegate?.isScanning(status:false)
@@ -97,7 +97,7 @@ class BleRadar:NSObject, CBCentralManagerDelegate,CBPeripheralDelegate {
     
     
     internal func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
-        print("servis keşfedildi")
+       print("BleRadar -> servis keşfedildi")
         self.delegate?.onDiscoverService(services: peripheral.services ?? [])
 
     }
@@ -106,7 +106,7 @@ class BleRadar:NSObject, CBCentralManagerDelegate,CBPeripheralDelegate {
     func connectService(serviceUUID:CBUUID) {
         if  let i = self.myPeripheral.services?.firstIndex(
                 where: {$0.uuid == serviceUUID}) {
-            print("connectService")
+           print("BleRadar -> connectService")
             
             self.myService = self.myPeripheral.services![i]
             self.myPeripheral.discoverCharacteristics(nil, for: self.myService)
@@ -131,7 +131,7 @@ class BleRadar:NSObject, CBCentralManagerDelegate,CBPeripheralDelegate {
     }
     
     func readCharacteristicValue(characteristicUUID:CBUUID) -> Bool{
-        print("readCharacteristicValue")
+       print("BleRadar -> readCharacteristicValue")
         
         let characteristic:CBCharacteristic = self.getCharacteristic(
             characteristicUUID: characteristicUUID
@@ -183,7 +183,7 @@ class BleRadar:NSObject, CBCentralManagerDelegate,CBPeripheralDelegate {
     }
     
     internal func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-        print("okuma isteği gitti")
+       print("BleRadar -> okuma isteği gitti")
         
         self.delegate?.onReadCharacteristic(
             characteristic: characteristic,
@@ -194,7 +194,7 @@ class BleRadar:NSObject, CBCentralManagerDelegate,CBPeripheralDelegate {
     
     
     func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
-        print("yazma isteği gitti")
+       print("BleRadar -> yazma isteği gitti")
         
         
         self.delegate?.onWriteCharacteristic(characteristic: characteristic)
@@ -205,7 +205,7 @@ class BleRadar:NSObject, CBCentralManagerDelegate,CBPeripheralDelegate {
         
         if (RSSI.int64Value < 0 && RSSI.int64Value > self.maxRssi) {
             let name = peripheral.name ?? "Bilinmeyen"
-            print("Cihaz --> ",String(name),", RSSI: ",RSSI)
+           print("BleRadar -> Cihaz --> ",String(name),", RSSI: ",RSSI)
             
             let isConnectDevice:Bool = delegate?.onDetectDevice(device: peripheral, rssi: RSSI) ?? false
             
@@ -220,14 +220,14 @@ class BleRadar:NSObject, CBCentralManagerDelegate,CBPeripheralDelegate {
     
     
     internal func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
-        print("didDiscoverCharacteristicsFor")
+       print("BleRadar -> didDiscoverCharacteristicsFor")
         self.delegate?.onDiscoverCharacteristic(characteristic: service.characteristics ?? [])
     }
       
     
     internal func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         self.delegate?.onConnectedDevice(status: false, device: peripheral)
-        print("bağlantı iptal oldu")
+       print("BleRadar -> bağlantı iptal oldu")
 
     }
 }

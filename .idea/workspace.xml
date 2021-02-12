@@ -6,19 +6,38 @@
     <option name="TOOL_WINDOW_REGEXP_FILTER" value="false" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6f3c793a-32a3-48fe-9677-62dd7ef6188e" name="Default Changelist" comment="" />
+    <list default="true" id="6f3c793a-32a3-48fe-9677-62dd7ef6188e" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.vscode/launch.json" beforeDir="false" afterPath="$PROJECT_DIR$/.vscode/launch.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/android/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/src/main/java/com/ahmet/ble_radar/BleRadarPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/com/ahmet/ble_radar/BleRadarPlugin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/src/main/java/com/ahmet/blescanner/BleScanner.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/com/ahmet/blescanner/BleScanner.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/src/main/java/com/ahmet/blescanner/tools/DeviceControls.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/com/ahmet/blescanner/tools/DeviceControls.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/src/main/java/com/ahmet/blescanner/tools/Executor.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/com/ahmet/blescanner/tools/Executor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/example/android/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/android/app/src/main/java/com/ahmet/ble_radar_example/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/example/android/app/src/main/java/com/ahmet/ble_radar_example/MainActivity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/lib/view/scanner_view.dart" beforeDir="false" afterPath="$PROJECT_DIR$/example/lib/view/scanner_view.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Classes/SwiftBleRadarPlugin.swift" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Classes/SwiftBleRadarPlugin.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Classes/bleRadar/BleRadar.swift" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Classes/bleRadar/BleRadar.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/ble_radar.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/ble_radar.dart" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[42004047070fc539]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[9885e6503847444156]" />
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Dart File" />
       </list>
     </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1nI41xOuWcUxSjceh6q8i0Hqkc0" />
   <component name="ProjectViewState">
@@ -29,7 +48,7 @@
     <property name="dart.analysis.tool.window.force.activate" value="true" />
     <property name="dart.analysis.tool.window.visible" value="false" />
     <property name="io.flutter.reload.alreadyRun" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/android" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.17" />
     <property name="project.structure.side.proportion" value="0.2" />

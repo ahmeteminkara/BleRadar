@@ -49,20 +49,20 @@
         
         @objc private func applicationDidBecomeActive(notification: NSNotification) {
             self.startMethod()
-            print("ACTIVE")
+           print("BleRadar -> ACTIVE")
         }
         
         
         @objc private func applicationDidEnterBackground(notification: NSNotification) {
             self.bleRadar.stopScan()
-            print("BACKGROUND")
+           print("BleRadar -> BACKGROUND")
         }
         
         func startMethod(){
             self.bleRadar.startScan(
                 filter: self.filterUUID,
                 maxRssi: self.maxRssi)
-            print("startMethod()")
+           print("BleRadar -> startMethod()")
         }
         
         public static func register(with registrar: FlutterPluginRegistrar) {
@@ -137,7 +137,7 @@
                 bleRadar.disconnectDevice()
                 break
             case "readCharacteristic":
-                print("readCharacteristic")
+               print("BleRadar -> readCharacteristic")
                 
                 actionType = ACTION_READ
                 
@@ -154,7 +154,7 @@
                 break
             case "writeCharacteristic":
                 actionType = ACTION_WRITE
-                print("writeCharacteristic")
+               print("BleRadar -> writeCharacteristic")
                 
                 guard let args = call.arguments else {
                     break
@@ -218,7 +218,7 @@
             }
             
             let sendData = stringify(json: servicesUUIDList)
-            print("sendData: " + sendData)
+           print("BleRadar -> sendData: " + sendData)
             
             eventSinkServicesDiscovered.eventSink?(sendData)
             
@@ -236,7 +236,7 @@
                 let status = bleRadar.readCharacteristicValue(
                     characteristicUUID: CBUUID.init(string: characteristic))
                 
-                print("readCharacteristic ",status)
+               print("BleRadar -> readCharacteristic ",status)
                 
                 break
             case ACTION_WRITE:
@@ -249,7 +249,7 @@
                     characteristicUUID: CBUUID.init(string: characteristic),
                     data: data
                 )
-                print("readCharacteristic ",status)
+               print("BleRadar -> readCharacteristic ",status)
                 
                 
                 

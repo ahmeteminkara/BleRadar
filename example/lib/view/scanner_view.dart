@@ -29,14 +29,14 @@ class _ScannerViewState extends State<ScannerView> {
   startMethod() {
     bleRadar.start(
       maxRssi: -45,
-      autoConnect: false,
+      autoConnect: true,
       filterUUID: ["99999999-8888-7777-6666-555555555555"],
     );
   }
 
   void initBle() {
     bleRadar = BleRadar(context);
-    Timer(Duration(seconds: 3), startMethod);
+    Timer(Duration(seconds: 1), startMethod);
 
     bleRadar.isEnableBluetooth.listen((status) {
       if (status == null) return;
@@ -65,14 +65,14 @@ class _ScannerViewState extends State<ScannerView> {
       setState(() {
         bluetoothDevice = device;
       });
-      bleRadar.stop();
-      bleRadar.connectDevice();
+      //bleRadar.stop();
+      //bleRadar.connectDevice();
     });
 
     bleRadar.isConnectedDevice.listen((status) {
       setState(() {
         isConnectedDevice = status;
-        if (!status && bluetoothDevice != null) {
+        if (!status) {
           bluetoothDevice = null;
         }
       });
@@ -80,10 +80,6 @@ class _ScannerViewState extends State<ScannerView> {
 
     bleRadar.onServicesDiscovered.listen((List<String> list) {
       servicesUUID.addAll(list);
-
-      //print(bleRadar.getCharacteristics("22e7ac41-88ab-4ff7-b4e9-5b9d7c2dd257"));
-
-      //readCustomerInfo();
       writeUserId();
     });
 
@@ -110,7 +106,7 @@ class _ScannerViewState extends State<ScannerView> {
     });
 
     bleRadar.onWriteCharacteristic.listen((status) {
-      bleRadar.disconnectDevice();
+      //bleRadar.disconnectDevice();
       _scaffoldKey.currentState.hideCurrentSnackBar();
       _scaffoldKey.currentState.showSnackBar(SnackBar(
         content: status
@@ -130,19 +126,23 @@ class _ScannerViewState extends State<ScannerView> {
               ),
         backgroundColor: status ? Colors.green : Colors.red,
         duration: Duration(seconds: 2),
-        onVisible: () => Timer(Duration(seconds: 2), startMethod),
+        onVisible: () {
+          Timer(Duration(seconds: 4), () {
+            startMethod();
+          });
+        },
       ));
     });
   }
 
-  void readCustomerInfo() {
+  readCustomerInfo() {
     final serviceUUID = "a6c33970-6c90-49f8-bf3b-47d149400b9c";
     final characteristicUUID = "86f774ee-31b7-40c2-adb0-bfbb0550626f";
-    print("readCustomerInfo");
+    print("BleRadar -> readCustomerInfo");
     bleRadar.readCharacteristic(serviceUUID, characteristicUUID);
   }
 
-  void writeUserId() {
+  writeUserId() {
     final serviceUUID = "a6c33970-6c90-49f8-bf3b-47d149400b9c";
     final characteristicUUID = "0c5ce913-5432-440d-8acd-4e301006682d";
     bleRadar.writeCharacteristic(serviceUUID, characteristicUUID, "042C806A486280");
@@ -162,10 +162,12 @@ class _ScannerViewState extends State<ScannerView> {
         appBar: AppBar(
           centerTitle: true,
           backgroundColor: Colors.red,
-          title: Text('Meyer Group'),
+          title: Text('Ble Radar'),
         ),
         body: Container(
           child: body,
+          width: double.infinity,
+          height: double.infinity,
           padding: EdgeInsets.all(10),
         ),
       ),
@@ -204,17 +206,23 @@ class _ScannerViewState extends State<ScannerView> {
 
   get _scannerStatus {
     if (isScanning) {
-      return Chip(
-        avatar: Icon(Icons.wifi_rounded, size: 20, color: Colors.white),
-        backgroundColor: Colors.blue,
-        label: Text("Tarama Aktif", style: TextStyle(color: Colors.white)),
+      return InkWell(
+        onTap: () => bleRadar.stop(),
+        child: Chip(
+          avatar: Icon(Icons.wifi_rounded, size: 20, color: Colors.white),
+          backgroundColor: Colors.blue,
+          label: Text("Tarama Aktif", style: TextStyle(color: Colors.white)),
+        ),
       );
     }
 
-    return Chip(
-      avatar: Icon(Icons.wifi_off_rounded, size: 20),
-      backgroundColor: Colors.grey,
-      label: Text("Tarama Devre Dışı"),
+    return InkWell(
+      onTap: () => startMethod(),
+      child: Chip(
+        avatar: Icon(Icons.wifi_off_rounded, size: 20),
+        backgroundColor: Colors.grey,
+        label: Text("Tarama Devre Dışı"),
+      ),
     );
   }
 
@@ -253,47 +261,4 @@ class _ScannerViewState extends State<ScannerView> {
       label: Text("Konum Devre Dışı"),
     );
   }
-
-/*
-Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("Bluetooth is " + (isEnableBluetooth ? "ON" : "OFF"),
-                      style: TextStyle(
-                        color: isEnableBluetooth ? Colors.green : Colors.red,
-                      )),
-                  Platform.isAndroid
-                      ? Text("Location is " + (isEnableLocation ? "ON" : "OFF"),
-                          style: TextStyle(
-                            color: isEnableLocation ? Colors.green : Colors.red,
-                          ))
-                      : Container(),
-                  Text("Scanner is " + (isScanning ? "ON" : "OFF"),
-                      style: TextStyle(
-                        color: isScanning ? Colors.green : Colors.red,
-                      )),
-                  Text((isConnectedDevice ? "Connected" : "Not connected") + " BLE Device",
-                      style: TextStyle(
-                        color: isConnectedDevice ? Colors.green : Colors.red,
-                      )),
-                  Text(bluetoothDevice != null ? bluetoothDevice.toString() : ""),
-                  /*
-                  Text(bluetoothDevice != null ? "${bluetoothDevice.name} Cihazına bağlandı" : ""),
-                  */
-                  FlatButton.icon(
-                    onPressed: () => startMethod(),
-                    icon: Icon(Icons.wifi_tethering),
-                    label: Text("Taramayı Başlat"),
-                  ),
-                  FlatButton.icon(
-                    onPressed: () => bleRadar.stop(),
-                    icon: Icon(Icons.portable_wifi_off),
-                    label: Text("Taramayı Bitir"),
-                  ),
-                ],
-              )
-*/
-
 }
