@@ -1,8 +1,10 @@
-import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:ble_radar/ble_radar.dart';
 import 'package:ble_radar/bluetooth_device.dart';
+import 'package:ble_radar_example/view/qr_scanner.dart';
+
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
@@ -36,7 +38,7 @@ class _ScannerViewState extends State<ScannerView> {
 
   void initBle() {
     bleRadar = BleRadar(context);
-    Timer(Duration(seconds: 1), startMethod);
+    //Timer(Duration(seconds: 1), startMethod);
 
     bleRadar.isEnableBluetooth.listen((status) {
       if (status == null) return;
@@ -106,7 +108,7 @@ class _ScannerViewState extends State<ScannerView> {
     });
 
     bleRadar.onWriteCharacteristic.listen((status) {
-      //bleRadar.disconnectDevice();
+      bleRadar.disconnectDevice();
       _scaffoldKey.currentState.hideCurrentSnackBar();
       _scaffoldKey.currentState.showSnackBar(SnackBar(
         content: status
@@ -127,9 +129,11 @@ class _ScannerViewState extends State<ScannerView> {
         backgroundColor: status ? Colors.green : Colors.red,
         duration: Duration(seconds: 2),
         onVisible: () {
+          /*
           Timer(Duration(seconds: 4), () {
             startMethod();
           });
+          */
         },
       ));
     });
@@ -163,6 +167,14 @@ class _ScannerViewState extends State<ScannerView> {
           centerTitle: true,
           backgroundColor: Colors.red,
           title: Text('Ble Radar'),
+          actions: [
+            FlatButton.icon(
+              textColor: Colors.white,
+              onPressed: () => startScanQR(),
+              icon: Icon(Icons.qr_code_scanner_rounded),
+              label: Text("QR Tara"),
+            )
+          ],
         ),
         body: Container(
           child: body,
@@ -260,5 +272,47 @@ class _ScannerViewState extends State<ScannerView> {
       backgroundColor: Colors.grey,
       label: Text("Konum Devre Dışı"),
     );
+  }
+
+  startScanQR() async {
+    final qrCode = await Navigator.push(context, MaterialPageRoute(builder: (_) => QRScanner()));
+
+    print("qrCode: " + qrCode);
+
+    String base64Text = qrCode.split("").reversed.join("") + "==";
+    List<String> content = utf8.decode(base64Decode(base64Text)).split("|");
+
+    if (content.isEmpty) return;
+    print("qrCode: $content");
+
+    String terminalName = content[0];
+    DateTime time = DateTime.parse(content[1]);
+    DateTime nowTime = DateTime.now();
+    int timeoutSecond = int.parse(content[2]);
+    int differenceSeconds = nowTime.difference(time).inSeconds;
+    String message = "";
+    Icon icon;
+    if (differenceSeconds > timeoutSecond) {
+      message = "QR kodun süresi dolmuştur!";
+      icon = Icon(Icons.timer_off_rounded, color: Colors.red);
+    } else {
+      message = "Geçiş Başarılı"; //\n //$terminalName\n //${content[1]}";
+      icon = Icon(Icons.done_rounded, color: Colors.green[600]);
+    }
+
+    print("---time: $time");
+    print("nowTime: $nowTime");
+    print("differenceSeconds: $differenceSeconds");
+
+    showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (c) {
+          return AlertDialog(
+              content: ListTile(
+            leading: icon,
+            title: Text(message),
+          ));
+        });
   }
 }

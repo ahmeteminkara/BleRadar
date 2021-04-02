@@ -12,6 +12,10 @@ dependencies:
   flutter:
     sdk: flutter
 
+  scan_preview: ^1.0.0
+
+
+
   ble_radar:
     # When depending on this package from a real application you should use:
     #   ble_radar: ^x.y.z

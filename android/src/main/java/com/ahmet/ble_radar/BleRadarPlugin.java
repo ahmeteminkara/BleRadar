@@ -123,6 +123,18 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
         instance.onAttachedToEngine(registrar.context(), registrar.messenger());
     }
 
+    @Override
+    public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
+        Log.e(BleScanner.TAG, "onAttachedToActivity");
+        this.activity = binding.getActivity();
+
+        permissionOK();
+
+        binding.addActivityResultListener(this);
+        binding.addRequestPermissionsResultListener(this);
+
+    }
+
 
     @Override
     public void onAttachedToEngine(FlutterPluginBinding binding) {
@@ -512,18 +524,7 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
     };
 
 
-    @Override
-    public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
-        Log.e(BleScanner.TAG, "onAttachedToActivity");
-        this.activity = binding.getActivity();
-
-        permissionOK();
-
-        binding.addActivityResultListener(this);
-        binding.addRequestPermissionsResultListener(this);
-
-    }
-
+    
     @Override
     public void onDetachedFromActivityForConfigChanges() {
         Log.e(BleScanner.TAG, "onDetachedFromActivityForConfigChanges");

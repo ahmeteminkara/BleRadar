@@ -2,7 +2,7 @@
     package="com.ahmet.ble_radar_example">
 
 
-    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
@@ -12,10 +12,11 @@
         android:name="android.hardware.bluetooth_le"
         android:required="true" />
 
+    <uses-permission android:name="android.permission.CAMERA"/>
 
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="ble_radar_example"
+        android:label="Ble Radar"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
