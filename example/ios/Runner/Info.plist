@@ -44,8 +44,7 @@
 
 	<key>NSCameraUsageDescription</key>
 	<string>Barkodları taramak için kameranıza erişebilir miyiz?</string>
-	<key>io.flutter.embedded_views_preview</key>
-	<Boolean>YES</string>
-
+    <key>io.flutter.embedded_views_preview</key>
+    <true/>
 </dict>
 </plist>
