@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:screen/screen.dart';
 
 import 'bluetooth_device.dart';
 
@@ -13,7 +12,6 @@ class BleRadar {
   final List<String> uuidFilterList;
 
   BleRadar(this.context, {this.uuidFilterList = const []}) {
-    Screen.keepOn(true);
     _loadListeners();
   }
 
