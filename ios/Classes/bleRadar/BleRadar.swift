@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import AudioToolbox
 import CoreBluetooth
 
 class BleRadar:NSObject, CBCentralManagerDelegate,CBPeripheralDelegate {
@@ -18,6 +19,8 @@ class BleRadar:NSObject, CBCentralManagerDelegate,CBPeripheralDelegate {
     private var maxRssi:Int32!
     var isActivedBluetooth:Bool = false
     var isScanning:Bool = false
+    
+    var vibration:Bool = false
     
     private var centralManager: CBCentralManager!
     private var myPeripheral: CBPeripheral!
@@ -56,16 +59,17 @@ class BleRadar:NSObject, CBCentralManagerDelegate,CBPeripheralDelegate {
     @objc private func restart(){
         self.stopScan()
         self.gattServiceCharacteristic.removeAll()
-        self.startScan(filter: self.filter, maxRssi: self.maxRssi)
+        self.startScan(filter: self.filter, maxRssi: self.maxRssi, vibrate: self.vibration)
     }
     
-    func startScan(filter:[CBUUID] = [],maxRssi:Int32) {
+    func startScan(filter:[CBUUID] = [],maxRssi:Int32, vibrate:Bool) {
        print("BleRadar -> Started Scan")
         if !isActivedBluetooth {
             return
         }
         self.filter = filter
         self.maxRssi = maxRssi
+        self.vibration = vibrate
         centralManager.scanForPeripherals(withServices: filter,options: [CBCentralManagerScanOptionAllowDuplicatesKey : true])
         isScanning = true
         delegate?.isScanning(status:true)
@@ -209,7 +213,12 @@ class BleRadar:NSObject, CBCentralManagerDelegate,CBPeripheralDelegate {
             
             let isConnectDevice:Bool = delegate?.onDetectDevice(device: peripheral, rssi: RSSI) ?? false
             
+            
             self.myPeripheral = peripheral
+            
+            if(self.vibration){
+                AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
+            }
             
             if(isConnectDevice){
                 self.connectDevice()

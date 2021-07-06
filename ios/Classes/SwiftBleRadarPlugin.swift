@@ -15,7 +15,9 @@
         var filterUUID:[CBUUID] = [CBUUID]()
         var maxRssi:Int32 = 0
         var autoConnect:Bool = false
+        var vibration:Bool  = false
         var isOpenBluetooth:Bool = false
+        
         var isScanning:Bool = false
         
         var bleRadar:BleRadar!
@@ -61,7 +63,8 @@
         func startMethod(){
             self.bleRadar.startScan(
                 filter: self.filterUUID,
-                maxRssi: self.maxRssi)
+                maxRssi: self.maxRssi,
+                vibrate:self.vibration)
            print("BleRadar -> startMethod()")
         }
         
@@ -107,12 +110,14 @@
                 if let myArgs = args as? [String: Any],
                    let _autoConnect = myArgs["autoConnect"] as? Bool,
                    let _filterUUID = myArgs["filterUUID"] as? [String],
-                   let _maxRssi = myArgs["maxRssi"] as? Int32 {
+                   let _maxRssi = myArgs["maxRssi"] as? Int32,
+                   let _vibration = myArgs["vibration"] as? Bool {
                     for uuid in _filterUUID {
                         self.filterUUID.append(CBUUID.init(string: uuid))
                     }
                     self.autoConnect=_autoConnect
                     self.maxRssi = _maxRssi
+                    self.vibration = _vibration
                     self.startMethod()
                     
                 }
