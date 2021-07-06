@@ -218,7 +218,8 @@ class BleRadar:NSObject, CBCentralManagerDelegate,CBPeripheralDelegate {
             
             if(self.vibration){
                 print("vibration : \(self.vibration)")
-                AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
+                AudioServicesPlayAlertSound(kSystemSoundID_Vibrate)
+
             }
             
             if(isConnectDevice){
