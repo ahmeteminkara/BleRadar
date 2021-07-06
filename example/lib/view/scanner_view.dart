@@ -1,9 +1,7 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:ble_radar/ble_radar.dart';
 import 'package:ble_radar/bluetooth_device.dart';
-import 'package:ble_radar_example/view/qr_scanner.dart';
 
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -17,7 +15,7 @@ class _ScannerViewState extends State<ScannerView> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   BleRadar bleRadar;
-  BluetoothDevice bluetoothDevice;
+  List<BluetoothDevice> bluetoothDevices = [];
   List<String> servicesUUID = [];
   bool isEnableBluetooth = false, isEnableLocation = false, isScanning = false, isConnectedDevice = false;
 
@@ -29,11 +27,8 @@ class _ScannerViewState extends State<ScannerView> {
   }
 
   startMethod() {
-    bleRadar.start(
-      maxRssi: -45,
-      autoConnect: true,
-      filterUUID: ["99999999-8888-7777-6666-555555555555"],
-    );
+    bleRadar.start(maxRssi: -45, autoConnect: false);
+    //filterUUID: ["99999999-8888-7777-6666-555555555555"],
   }
 
   void initBle() {
@@ -64,8 +59,16 @@ class _ScannerViewState extends State<ScannerView> {
     });
 
     bleRadar.onDetectDevice.listen((BluetoothDevice device) {
+      print("BluetoothDevice : ${device.toString()}");
       setState(() {
-        bluetoothDevice = device;
+        int index = bluetoothDevices.indexWhere((BluetoothDevice item) => item.name == device.name);
+        if (index == -1) {
+          bluetoothDevices.add(device);
+        } else {
+          bluetoothDevices.elementAt(index).rssi = device.rssi;
+        }
+
+        if (bluetoothDevices.length > 1) bluetoothDevices.sort((a, b) => b.rssi.compareTo(a.rssi));
       });
       //bleRadar.stop();
       //bleRadar.connectDevice();
@@ -75,7 +78,7 @@ class _ScannerViewState extends State<ScannerView> {
       setState(() {
         isConnectedDevice = status;
         if (!status) {
-          bluetoothDevice = null;
+          //bluetoothDevice = null;
         }
       });
     });
@@ -84,7 +87,7 @@ class _ScannerViewState extends State<ScannerView> {
       servicesUUID.addAll(list);
       writeUserId();
     });
-
+/*
     bleRadar.onReadCharacteristic.listen((data) {
       _scaffoldKey.currentState.hideCurrentSnackBar();
       _scaffoldKey.currentState.showSnackBar(SnackBar(
@@ -137,6 +140,7 @@ class _ScannerViewState extends State<ScannerView> {
         },
       ));
     });
+*/
   }
 
   readCustomerInfo() {
@@ -164,16 +168,14 @@ class _ScannerViewState extends State<ScannerView> {
       home: Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
-          centerTitle: true,
           backgroundColor: Colors.red,
           title: Text('Ble Radar'),
           actions: [
-            FlatButton.icon(
-              textColor: Colors.white,
-              onPressed: () => startScanQR(),
-              icon: Icon(Icons.qr_code_scanner_rounded),
-              label: Text("QR Tara"),
-            )
+            // TextButton.icon(
+            //     style: ButtonStyle(foregroundColor: MaterialStateProperty.all(Colors.white)),
+            //     onPressed: () => startScanQR(),
+            //     icon: Icon(Icons.qr_code_scanner_rounded),
+            //     label: Text("QR Tara"))
           ],
         ),
         body: Container(
@@ -190,7 +192,17 @@ class _ScannerViewState extends State<ScannerView> {
     return Column(
       children: [
         Expanded(
-          child: bodyCenter,
+          child: ListView.builder(
+            itemCount: bluetoothDevices.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: Text(bluetoothDevices.elementAt(index).name ?? "NoName"),
+                leading: CircleAvatar(
+                  child: Text(bluetoothDevices.elementAt(index).rssi.toString()),
+                ),
+              );
+            },
+          ),
         ),
         _scannerStatus,
         _bluetoothStatus,
@@ -272,47 +284,5 @@ class _ScannerViewState extends State<ScannerView> {
       backgroundColor: Colors.grey,
       label: Text("Konum Devre Dışı"),
     );
-  }
-
-  startScanQR() async {
-    final qrCode = await Navigator.push(context, MaterialPageRoute(builder: (_) => QRScanner()));
-
-    print("qrCode: " + qrCode);
-
-    String base64Text = qrCode.split("").reversed.join("") + "==";
-    List<String> content = utf8.decode(base64Decode(base64Text)).split("|");
-
-    if (content.isEmpty) return;
-    print("qrCode: $content");
-
-    String terminalName = content[0];
-    DateTime time = DateTime.parse(content[1]);
-    DateTime nowTime = DateTime.now();
-    int timeoutSecond = int.parse(content[2]);
-    int differenceSeconds = nowTime.difference(time).inSeconds;
-    String message = "";
-    Icon icon;
-    if (differenceSeconds > timeoutSecond) {
-      message = "QR kodun süresi dolmuştur!";
-      icon = Icon(Icons.timer_off_rounded, color: Colors.red);
-    } else {
-      message = "Geçiş Başarılı"; //\n //$terminalName\n //${content[1]}";
-      icon = Icon(Icons.done_rounded, color: Colors.green[600]);
-    }
-
-    print("---time: $time");
-    print("nowTime: $nowTime");
-    print("differenceSeconds: $differenceSeconds");
-
-    showDialog(
-        context: context,
-        barrierDismissible: true,
-        builder: (c) {
-          return AlertDialog(
-              content: ListTile(
-            leading: icon,
-            title: Text(message),
-          ));
-        });
   }
 }

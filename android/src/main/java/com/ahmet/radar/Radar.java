@@ -1,22 +1,20 @@
-package com.ahmet.blescanner;
+package com.ahmet.radar;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
-import android.bluetooth.le.ScanFilter;
-import android.bluetooth.le.ScanSettings;
 
-import com.ahmet.blescanner.listener.BleScannerCallback;
-import com.ahmet.blescanner.listener.BleScannerErrorCallback;
-import com.ahmet.blescanner.listener.BleServiceCallback;
-import com.ahmet.blescanner.tools.DeviceControls;
-import com.ahmet.blescanner.tools.Executor;
+import com.ahmet.radar.listener.BleScannerCallback;
+import com.ahmet.radar.listener.BleScannerErrorCallback;
+import com.ahmet.radar.listener.BleServiceCallback;
+import com.ahmet.radar.tools.DeviceControls;
+import com.ahmet.radar.tools.Executor;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class BleScanner extends Executor {
+public class Radar extends Executor {
     /**
      * Log ekraınıda filtreleme için "BleScanner" ı aratın
      */
@@ -37,21 +35,29 @@ public class BleScanner extends Executor {
      * @param scannerCallback BLE tarama durumunu izlemek için
      * @param errorCallback   Hataları yakalamak için
      */
-    public BleScanner(Activity activity,
-                      List<ScanFilter> scanFilters,
-                      ScanSettings scanSettings,
-                      BleScannerCallback scannerCallback,
-                      BleServiceCallback bleServiceCallback,
-                      BleScannerErrorCallback errorCallback) {
+    public Radar(Activity activity,
+                 UUID[] scanFilters,
+                 BleScannerCallback scannerCallback,
+                 BleServiceCallback bleServiceCallback,
+                 BleScannerErrorCallback errorCallback) {
+        /**
+
+         public Radar(Activity activity,
+         UUID[] scanFilters,
+         BleScannerCallback scannerCallback,
+         BleServiceCallback bleServiceCallback,
+         BleScannerErrorCallback errorCallback) {
+         */
 
 
-        super(activity, scanFilters, scanSettings, scannerCallback, bleServiceCallback, errorCallback);
+        super(activity, scanFilters, scannerCallback, bleServiceCallback, errorCallback);
 
         this.activity = activity;
         this.errorCallback = errorCallback;
-        if (!DeviceControls.checkSetting(this.activity, this.errorCallback)) return;
+        DeviceControls.checkSetting(this.activity, this.errorCallback);
 
     }
+
 
     public void startScan(int maxRssi, boolean vibration, boolean autoConnect) {
         if (!DeviceControls.checkSetting(this.activity, this.errorCallback)) return;

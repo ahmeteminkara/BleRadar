@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class BluetoothDevice {
-  final String name;
-  final int rssi;
+  String name;
+  int rssi;
 
   BluetoothDevice({
     @required this.name,

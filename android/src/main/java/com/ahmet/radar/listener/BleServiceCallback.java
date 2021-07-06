@@ -1,4 +1,4 @@
-package com.ahmet.blescanner.listener;
+package com.ahmet.radar.listener;
 
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;

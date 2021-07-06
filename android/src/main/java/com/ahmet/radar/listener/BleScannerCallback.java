@@ -1,4 +1,4 @@
-package com.ahmet.blescanner.listener;
+package com.ahmet.radar.listener;
 
 import android.bluetooth.BluetoothDevice;
 
@@ -17,7 +17,7 @@ public abstract class BleScannerCallback {
      * @param device bulunan cihaz
      * @return cihaza otomatik bağlanma
      */
-    public abstract boolean onDetectDevice(BluetoothDevice device);
+    public abstract boolean onDetectDevice(BluetoothDevice device,int rssi);
 
     /**
      * @param isConnected cihaz ile bağlı olma durumu

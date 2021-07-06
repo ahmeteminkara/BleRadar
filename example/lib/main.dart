@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
     return MaterialApp(
-      title: "Ble Radar",
+      title: "BleRadar",
       home: ScannerView(),
     );
   }

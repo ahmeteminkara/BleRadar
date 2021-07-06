@@ -1,4 +1,4 @@
-package com.ahmet.blescanner.enums;
+package com.ahmet.radar.enums;
 
 public enum BleScanErrors {
     NOT_START_SCANNER,

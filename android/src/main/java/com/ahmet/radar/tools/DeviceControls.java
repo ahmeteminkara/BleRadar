@@ -1,4 +1,4 @@
-package com.ahmet.blescanner.tools;
+package com.ahmet.radar.tools;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -12,9 +12,9 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.provider.Settings;
 
-import com.ahmet.blescanner.BleScanner;
-import com.ahmet.blescanner.enums.BleDeviceErrors;
-import com.ahmet.blescanner.listener.BleScannerErrorCallback;
+import com.ahmet.radar.Radar;
+import com.ahmet.radar.enums.BleDeviceErrors;
+import com.ahmet.radar.listener.BleScannerErrorCallback;
 
 public class DeviceControls {
     @SuppressLint("StaticFieldLeak")
@@ -66,7 +66,7 @@ public class DeviceControls {
                     != PackageManager.PERMISSION_GRANTED) {
                 activity.requestPermissions(
                         new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                        BleScanner.locationRequestCode
+                        Radar.locationRequestCode
                 );
                 return false;
             }
@@ -85,7 +85,7 @@ public class DeviceControls {
         if (!isOpenBluetooth(activity)) {
             errorCallback.onDeviceError(BleDeviceErrors.BLUETOOTH_NOT_ACTIVE);
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            activity.startActivityForResult(enableIntent, BleScanner.bluetoothRequestCode);
+            activity.startActivityForResult(enableIntent, Radar.bluetoothRequestCode);
             return false;
         }
         if (!isSupportBle(activity)) {
@@ -96,7 +96,7 @@ public class DeviceControls {
         if (!isOpenLocation(activity)) {
             errorCallback.onDeviceError(BleDeviceErrors.LOCATION_NOT_ACTIVE);
             Intent viewIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            activity.startActivityForResult(viewIntent, BleScanner.locationRequestCode);
+            activity.startActivityForResult(viewIntent, Radar.locationRequestCode);
             return false;
         }
         if (!isLocationPermission(activity)) {

@@ -1,7 +1,7 @@
-package com.ahmet.blescanner.listener;
+package com.ahmet.radar.listener;
 
-import com.ahmet.blescanner.enums.BleDeviceErrors;
-import com.ahmet.blescanner.enums.BleScanErrors;
+import com.ahmet.radar.enums.BleDeviceErrors;
+import com.ahmet.radar.enums.BleScanErrors;
 
 public abstract class BleScannerErrorCallback {
     /**
