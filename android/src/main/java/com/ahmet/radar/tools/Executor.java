@@ -71,6 +71,7 @@ public class Executor {
 
     private BluetoothAdapter bluetoothAdapter;
 
+    boolean hardStop = false;
 
     public Executor(
             Activity activity,
@@ -99,6 +100,7 @@ public class Executor {
      * @param autoConnect Otomatik bağlan
      */
     protected void start(int maxRssi, boolean vibration, boolean autoConnect) {
+        if(hardStop)return;
         Log.d(Radar.TAG, "----> Start Scanner");
         this.maxRssi = maxRssi;
         this.vibration = vibration;
@@ -111,7 +113,7 @@ public class Executor {
 
             bluetoothAdapter.startLeScan(scanFilterList.length > 0 ? scanFilterList : null, scanCallback);
             bleScannerCallback.onScanning(true);
-
+            hardStop = false;
             setHandler();
 
         } catch (Exception e) {
@@ -120,8 +122,12 @@ public class Executor {
     }
 
 
-    public void stop() {
+    public void stop(boolean hardStopValue) {
+        hardStop = hardStopValue;
         clearHandler();
+
+        new Handler().postDelayed(() -> hardStop = false,5000);
+
         bluetoothAdapter.stopLeScan(scanCallback);
         bleScannerCallback.onScanning(false);
     }
@@ -168,7 +174,7 @@ public class Executor {
     private final Runnable restartRunnable = () -> {
 
         Log.d(Radar.TAG, "Restart Scanner");
-        stop();
+        stop(false);
         new Handler().postDelayed(() -> start(maxRssi, vibration, autoConnect), 1000);
     };
     private final Handler restartHandler = new Handler();
@@ -203,7 +209,7 @@ public class Executor {
                 if (vibration) startVibration();
                 boolean autoConnect = bleScannerCallback.onDetectDevice(connectedBluetoothDevice, rssi);
                 if (autoConnect) {
-                    stop();
+                    stop(true);
                     connectDevice();
                 }
             }

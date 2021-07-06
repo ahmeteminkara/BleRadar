@@ -46,7 +46,6 @@ import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
@@ -237,7 +236,7 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
 
                         boolean isOpen = DeviceControls.isOpenLocation(activity);
                         if (!isOpen) {
-                            radar.stop();
+                            radar.stop(true);
                         }
                         events.success(isOpen);
 
@@ -370,7 +369,7 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
                 break;
             case "stopScan":
                 Log.e(Radar.TAG, "flutter dan STOP geldi");
-                radar.stop();
+                radar.stop(true);
                 break;
             case "connectDevice":
                 radar.connectDevice();
