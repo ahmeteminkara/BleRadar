@@ -100,7 +100,7 @@ public class Executor {
      * @param autoConnect Otomatik bağlan
      */
     protected void start(int maxRssi, boolean vibration, boolean autoConnect) {
-        if(hardStop)return;
+        if (hardStop) return;
         Log.d(Radar.TAG, "----> Start Scanner");
         this.maxRssi = maxRssi;
         this.vibration = vibration;
@@ -126,7 +126,7 @@ public class Executor {
         hardStop = hardStopValue;
         clearHandler();
 
-        new Handler().postDelayed(() -> hardStop = false,5000);
+        new Handler().postDelayed(() -> hardStop = false, 5000);
 
         bluetoothAdapter.stopLeScan(scanCallback);
         bleScannerCallback.onScanning(false);
@@ -171,15 +171,9 @@ public class Executor {
         }
     }
 
-    private final Runnable restartRunnable = () -> {
-
-        if(hardStop){
-            return;
-        }
-        Log.d(Radar.TAG, "Restart Scanner");
-        stop(false);
-        new Handler().postDelayed(() -> start(maxRssi, vibration, autoConnect), 1000);
+    private Runnable restartRunnable = () -> {
     };
+
     private final Handler restartHandler = new Handler();
 
 
@@ -188,6 +182,15 @@ public class Executor {
      */
     private void setHandler() {
         long restartDelaySecond = 1000;
+        restartRunnable = () -> {
+
+            if (hardStop) {
+                return;
+            }
+            Log.d(Radar.TAG, "Restart Scanner");
+            stop(false);
+            new Handler().postDelayed(() -> start(maxRssi, vibration, autoConnect), 1000);
+        };
         restartHandler.postDelayed(restartRunnable, restartDelaySecond);
     }
 
@@ -195,6 +198,9 @@ public class Executor {
      * Zamanlayıcıyı durdur
      */
     private void clearHandler() {
+        restartRunnable = () -> {
+        };
+
         restartHandler.removeCallbacks(restartRunnable);
     }
 
