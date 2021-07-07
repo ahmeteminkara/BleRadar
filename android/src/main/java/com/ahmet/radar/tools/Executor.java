@@ -173,6 +173,9 @@ public class Executor {
 
     private final Runnable restartRunnable = () -> {
 
+        if(hardStop){
+            return;
+        }
         Log.d(Radar.TAG, "Restart Scanner");
         stop(false);
         new Handler().postDelayed(() -> start(maxRssi, vibration, autoConnect), 1000);
