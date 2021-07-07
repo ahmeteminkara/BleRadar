@@ -32,7 +32,7 @@ class _ScannerViewState extends State<ScannerView> {
   }
 
   void initBle() {
-    bleRadar = BleRadar(context);
+    bleRadar = BleRadar();
     //Timer(Duration(seconds: 1), startMethod);
 
     bleRadar.isEnableBluetooth.listen((status) {
