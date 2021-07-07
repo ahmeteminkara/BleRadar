@@ -8,32 +8,41 @@ import 'dart:io';
 import 'bluetooth_device.dart';
 
 class BleRadar {
-  final BuildContext context;
   final List<String> uuidFilterList;
 
-  BleRadar(this.context, {this.uuidFilterList = const []}) {
+  StreamSubscription subLocationStatusStream;
+  StreamSubscription subBluetoothStatusStream;
+  StreamSubscription subScanningStatusStream;
+  StreamSubscription subDetectDeviceStream;
+  StreamSubscription subConnectedDeviceStream;
+  StreamSubscription subServicesDiscoveredStream;
+  StreamSubscription subReadCharacteristicStream;
+  StreamSubscription subWriteCharacteristicStream;
+
+  BleRadar({this.uuidFilterList = const []}) {
     _loadListeners();
   }
 
   _loadListeners() async {
     if (Platform.isAndroid) {
       _isEnableLocationController.add(await _channel.invokeMethod('isOpenLocation'));
-      EventChannel("locationStatusStream").receiveBroadcastStream().listen((e) {
+
+      subLocationStatusStream = EventChannel("locationStatusStream").receiveBroadcastStream().listen((e) {
         _isEnableLocationController.add(e);
       });
     }
     _isEnableBluetoothController.add(await _channel.invokeMethod('isOpenBluetooth'));
     _isScanningController.add(await _channel.invokeMethod('isScanning'));
 
-    EventChannel("bluetoothStatusStream").receiveBroadcastStream().listen((e) {
+    subBluetoothStatusStream = EventChannel("bluetoothStatusStream").receiveBroadcastStream().listen((e) {
       _isEnableBluetoothController.add(e);
     });
 
-    EventChannel("scanningStatusStream").receiveBroadcastStream().listen((e) {
+    subScanningStatusStream = EventChannel("scanningStatusStream").receiveBroadcastStream().listen((e) {
       _isScanningController.add(e);
     });
 
-    EventChannel("detectDeviceStream").receiveBroadcastStream().listen((e) {
+    subDetectDeviceStream = EventChannel("detectDeviceStream").receiveBroadcastStream().listen((e) {
       Map json = jsonDecode(e);
 
       _onDetectDeviceController.add(BluetoothDevice(
@@ -42,11 +51,11 @@ class BleRadar {
       ));
     });
 
-    EventChannel("connectedDeviceStream").receiveBroadcastStream().listen((e) {
+    subConnectedDeviceStream = EventChannel("connectedDeviceStream").receiveBroadcastStream().listen((e) {
       _isConnectedDeviceController.add(e);
     });
 
-    EventChannel("servicesDiscoveredStream").receiveBroadcastStream().listen((e) {
+    subServicesDiscoveredStream = EventChannel("servicesDiscoveredStream").receiveBroadcastStream().listen((e) {
       List<String> list = [];
       for (var item in jsonDecode(e)) {
         list.add(item);
@@ -54,23 +63,18 @@ class BleRadar {
       _onServicesDiscoveredController.add(list);
     });
 
-    EventChannel("readCharacteristicStream").receiveBroadcastStream().listen((e) {
+    subReadCharacteristicStream = EventChannel("readCharacteristicStream").receiveBroadcastStream().listen((e) {
       _onReadCharacteristicController.add(e);
     });
 
-    EventChannel("writeCharacteristicStream").receiveBroadcastStream().listen((e) {
+    subWriteCharacteristicStream = EventChannel("writeCharacteristicStream").receiveBroadcastStream().listen((e) {
       _onWriteCharacteristicController.add(e);
     });
   }
 
   final MethodChannel _channel = const MethodChannel('ble_radar');
 
-  Future start({
-    @required int maxRssi,
-    @required bool autoConnect,
-    bool vibration = true,
-    List<String> filterUUID = const [],
-  }) async {
+  Future start({@required int maxRssi, @required bool autoConnect, bool vibration = false, List<String> filterUUID = const []}) async {
     await _channel.invokeMethod("startScan", {
       "maxRssi": maxRssi,
       "autoConnect": autoConnect,
@@ -139,6 +143,15 @@ class BleRadar {
   final _onWriteCharacteristicController = StreamController<bool>();
 
   void dispose() {
+    if (subLocationStatusStream != null) subLocationStatusStream.cancel();
+    if (subBluetoothStatusStream != null) subBluetoothStatusStream.cancel();
+    if (subScanningStatusStream != null) subScanningStatusStream.cancel();
+    if (subDetectDeviceStream != null) subDetectDeviceStream.cancel();
+    if (subConnectedDeviceStream != null) subConnectedDeviceStream.cancel();
+    if (subServicesDiscoveredStream != null) subServicesDiscoveredStream.cancel();
+    if (subReadCharacteristicStream != null) subReadCharacteristicStream.cancel();
+    if (subWriteCharacteristicStream != null) subWriteCharacteristicStream.cancel();
+
     _isEnableBluetoothController.close();
     _isEnableLocationController.close();
     _isScanningController.close();
