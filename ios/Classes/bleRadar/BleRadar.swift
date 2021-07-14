@@ -63,7 +63,7 @@ class BleRadar:NSObject, CBCentralManagerDelegate,CBPeripheralDelegate {
     }
     
     func startScan(filter:[CBUUID] = [],maxRssi:Int32, vibrate:Bool) {
-       print("BleRadar -> Started Scan")
+       //print("BleRadar -> Started Scan")
         if !isActivedBluetooth {
             return
         }
@@ -78,7 +78,7 @@ class BleRadar:NSObject, CBCentralManagerDelegate,CBPeripheralDelegate {
     }
     
     func stopScan(){
-       print("BleRadar -> Stoped Scan")
+       //print("BleRadar -> Stoped Scan")
         centralManager.stopScan()
         isScanning = false
         delegate?.isScanning(status:false)
