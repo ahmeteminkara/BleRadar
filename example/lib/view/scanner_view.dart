@@ -4,7 +4,6 @@ import 'package:ble_radar/ble_radar.dart';
 import 'package:ble_radar/bluetooth_device.dart';
 
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 
 class ScannerView extends StatefulWidget {
   @override
@@ -204,7 +203,8 @@ class _ScannerViewState extends State<ScannerView> {
             },
           ),
         ),
-        _scannerStatus,
+        _scannerStart,
+        _scannerStop,
         _bluetoothStatus,
         _locationStatus,
       ],
@@ -216,7 +216,6 @@ class _ScannerViewState extends State<ScannerView> {
       return Stack(
         alignment: Alignment.center,
         children: [
-          Positioned.fill(child: Lottie.asset("assets/lottie_scan.json", repeat: true, reverse: false)),
           Positioned(
             width: 70,
             height: 70,
@@ -225,27 +224,27 @@ class _ScannerViewState extends State<ScannerView> {
         ],
       );
     }
-    return Lottie.asset("assets/lottie_loading.json", repeat: true, reverse: true);
+    return Icon(Icons.timelapse, size: 60, color: Colors.blue);
   }
 
-  get _scannerStatus {
-    if (isScanning) {
-      return InkWell(
-        onTap: () => bleRadar.stop(),
-        child: Chip(
-          avatar: Icon(Icons.wifi_rounded, size: 20, color: Colors.white),
-          backgroundColor: Colors.blue,
-          label: Text("Tarama Aktif", style: TextStyle(color: Colors.white)),
-        ),
-      );
-    }
-
+  get _scannerStart {
     return InkWell(
       onTap: () => startMethod(),
       child: Chip(
         avatar: Icon(Icons.wifi_off_rounded, size: 20),
         backgroundColor: Colors.grey,
-        label: Text("Tarama Devre Dışı"),
+        label: Text("Taramayı Başlat"),
+      ),
+    );
+  }
+
+  get _scannerStop {
+    return InkWell(
+      onTap: () => bleRadar.stop(),
+      child: Chip(
+        avatar: Icon(Icons.wifi_rounded, size: 20, color: Colors.white),
+        backgroundColor: Colors.blue,
+        label: Text("Taramayı Bitir", style: TextStyle(color: Colors.white)),
       ),
     );
   }

@@ -1,6 +1,7 @@
-import 'package:ble_radar_example/view/scanner_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import 'view/scanner_view.dart';
 
 void main() {
   runApp(MyApp());

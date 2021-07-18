@@ -23,8 +23,9 @@ import com.ahmet.radar.listener.BleScannerCallback;
 import com.ahmet.radar.listener.BleScannerErrorCallback;
 import com.ahmet.radar.listener.BleServiceCallback;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
-
 
 import static android.bluetooth.BluetoothGatt.GATT_SUCCESS;
 
@@ -71,7 +72,9 @@ public class Executor {
 
     private BluetoothAdapter bluetoothAdapter;
 
-    boolean hardStop = false;
+    boolean flutterHardStop = false;
+
+    long restartDelaySecond = 2000;
 
     public Executor(
             Activity activity,
@@ -87,6 +90,12 @@ public class Executor {
             this.bleServiceCallback = bleServiceCallback;
             this.bleScannerErrorCallback = errorCallback;
 
+
+            BluetoothManager bluetoothManager = (BluetoothManager)
+                    activity.getSystemService(Context.BLUETOOTH_SERVICE);
+            bluetoothAdapter = bluetoothManager.getAdapter();
+
+
         } catch (Exception e) {
             Log.e(Radar.TAG, "Executer: " + e.getMessage());
         }
@@ -100,41 +109,60 @@ public class Executor {
      * @param autoConnect Otomatik bağlan
      */
     protected void start(int maxRssi, boolean vibration, boolean autoConnect) {
-        if (hardStop) return;
-        Log.d(Radar.TAG, "----> Start Scanner");
+
+        Log.e(Radar.TAG, "----> Start Scanner");
         this.maxRssi = maxRssi;
         this.vibration = vibration;
         this.autoConnect = autoConnect;
-        BluetoothManager bluetoothManager = (BluetoothManager)
-                activity.getSystemService(Context.BLUETOOTH_SERVICE);
-        bluetoothAdapter = bluetoothManager.getAdapter();
 
+        setTimer();
+
+
+    }
+
+    private void setTimer() {
         try {
 
             bluetoothAdapter.startLeScan(scanFilterList.length > 0 ? scanFilterList : null, scanCallback);
             bleScannerCallback.onScanning(true);
-            hardStop = false;
-            setHandler();
 
         } catch (Exception e) {
-            this.bleScannerErrorCallback.onScanError(BleScanErrors.NOT_START_SCANNER);
+            bleScannerErrorCallback.onScanError(BleScanErrors.NOT_START_SCANNER);
+            Log.e(Radar.TAG, e.toString());
         }
+
+
+        new Handler().postDelayed(() -> {
+            bluetoothAdapter.cancelDiscovery();
+            bluetoothAdapter.stopLeScan(scanCallback);
+            bleScannerCallback.onScanning(false);
+        }, (long) (restartDelaySecond * 0.6));
+
+
+        if (!flutterHardStop) {
+
+            new Handler().postDelayed(() -> {
+                setTimer();
+            }, restartDelaySecond);
+
+        }
+
+
     }
 
 
     public void stop(boolean hardStopValue) {
-        hardStop = hardStopValue;
-        clearHandler();
 
-        new Handler().postDelayed(() -> hardStop = false, 5000);
 
-        bluetoothAdapter.stopLeScan(scanCallback);
-        bleScannerCallback.onScanning(false);
+        flutterHardStop = hardStopValue;
+        if (flutterHardStop) {
+            new Handler().postDelayed(() -> flutterHardStop = false, restartDelaySecond * 2);
+        }
     }
 
     public void connectDevice() {
 
-        Log.d(Radar.TAG, "connectGatt");
+        Log.e(Radar.TAG, "connectGatt");
         try {
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -171,38 +199,6 @@ public class Executor {
         }
     }
 
-    private Runnable restartRunnable = () -> {
-    };
-
-    private final Handler restartHandler = new Handler();
-
-
-    /**
-     * Zamanlayıcıyı çalıştır
-     */
-    private void setHandler() {
-        long restartDelaySecond = 1000;
-        restartRunnable = () -> {
-
-            if (hardStop) {
-                return;
-            }
-            Log.d(Radar.TAG, "Restart Scanner");
-            stop(false);
-            new Handler().postDelayed(() -> start(maxRssi, vibration, autoConnect), 1000);
-        };
-        restartHandler.postDelayed(restartRunnable, restartDelaySecond);
-    }
-
-    /**
-     * Zamanlayıcıyı durdur
-     */
-    private void clearHandler() {
-        restartRunnable = () -> {
-        };
-
-        restartHandler.removeCallbacks(restartRunnable);
-    }
 
     private final BluetoothAdapter.LeScanCallback scanCallback = new BluetoothAdapter.LeScanCallback() {
 
@@ -259,7 +255,7 @@ public class Executor {
 
             if (status == 133 || status == 257) {
                 Log.e(Radar.TAG, "-----> !!! onConnectionStateChange status: " + status);
-                setHandler();
+                setTimer();
             }
         }
 
