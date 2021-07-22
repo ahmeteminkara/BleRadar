@@ -11,8 +11,9 @@ import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Build;
 import android.provider.Settings;
+import android.util.Log;
 
-import com.ahmet.radar.Radar;
+import com.ahmet.radar.BleScanner;
 import com.ahmet.radar.enums.BleDeviceErrors;
 import com.ahmet.radar.listener.BleScannerErrorCallback;
 
@@ -60,16 +61,31 @@ public class DeviceControls {
     /**
      * konum izninin verilip verilmediğini kontrol eder
      */
-    public static boolean isLocationPermission(Activity activity) {
+    public static boolean isFineLocationPermission(Activity activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (activity.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
+                activity.requestPermissions(
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        BleScanner.fineLocationRequestCode
+                );
+                return false;
+            }
+
+        }
+        return true;
+    }
+    public static boolean isCourseLocationPermission(Activity activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (activity.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED) {
                 activity.requestPermissions(
                         new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                        Radar.locationRequestCode
+                        BleScanner.courseLocationRequestCode
                 );
                 return false;
             }
+
         }
         return true;
     }
@@ -85,7 +101,7 @@ public class DeviceControls {
         if (!isOpenBluetooth(activity)) {
             errorCallback.onDeviceError(BleDeviceErrors.BLUETOOTH_NOT_ACTIVE);
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            activity.startActivityForResult(enableIntent, Radar.bluetoothRequestCode);
+            activity.startActivityForResult(enableIntent, BleScanner.bluetoothRequestCode);
             return false;
         }
         if (!isSupportBle(activity)) {
@@ -96,10 +112,20 @@ public class DeviceControls {
         if (!isOpenLocation(activity)) {
             errorCallback.onDeviceError(BleDeviceErrors.LOCATION_NOT_ACTIVE);
             Intent viewIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            activity.startActivityForResult(viewIntent, Radar.locationRequestCode);
+
+            activity.startActivityForResult(viewIntent, BleScanner.fineLocationRequestCode);
+            activity.startActivityForResult(viewIntent, BleScanner.courseLocationRequestCode);
+
             return false;
         }
-        if (!isLocationPermission(activity)) {
+        if (!isFineLocationPermission(activity)) {
+            Log.e(BleScanner.TAG,"isFineLocationPermission false");
+            errorCallback.onDeviceError(BleDeviceErrors.LOCATION_NOT_PERMISSION);
+            return false;
+        }
+
+        if (!isCourseLocationPermission(activity)) {
+            Log.e(BleScanner.TAG,"isCourseLocationPermission false");
             errorCallback.onDeviceError(BleDeviceErrors.LOCATION_NOT_PERMISSION);
             return false;
         }
