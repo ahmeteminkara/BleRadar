@@ -1,6 +1,6 @@
 name: ble_radar
 description: A BLE Scanner Flutter plugin.
-version: 0.1.3
+version: 0.1.5
 homepage:
 
 environment:
