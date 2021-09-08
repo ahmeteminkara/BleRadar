@@ -344,7 +344,7 @@ public class Executor {
             switch (newState) {
                 case BluetoothProfile.STATE_CONNECTED:
                     Log.e(BleScanner.TAG, "newState: " + newState + " STATE_CONNECTED 🔗");
-                    bluetoothGatt = gatt;
+                    //bluetoothGatt = gatt;
                     bleScannerCallback.onConnectDevice(true, connectedBluetoothDevice);
                     gatt.discoverServices();
                     break;
