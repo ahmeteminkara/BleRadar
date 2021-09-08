@@ -1,6 +1,5 @@
 package com.ahmet.radar.tools;
 
-
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -17,7 +16,6 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
@@ -31,6 +29,7 @@ import com.ahmet.radar.listener.BleServiceCallback;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 
 import static android.bluetooth.BluetoothGatt.GATT_SUCCESS;
 
@@ -43,11 +42,10 @@ public class Executor {
     /**
      * Tarama filtresinin listesi
      */
-    //private UUID[] scanFilterList;
+    private UUID[] uuidList;
     private List<ScanFilter> scanFilterList;
 
     private ScanSettings scanSettings;
-
 
     /**
      * Taramanın dinleyicisi
@@ -91,6 +89,7 @@ public class Executor {
 
     public Executor(
             Activity activity,
+            UUID[] uuidList,
             List<ScanFilter> scanFilters,
             ScanSettings scanSettings,
             BleScannerCallback callback,
@@ -99,6 +98,7 @@ public class Executor {
 
         try {
             this.activity = activity;
+            this.uuidList = uuidList;
             this.scanFilterList = scanFilters;
             this.scanSettings = scanSettings;
             this.bleScannerCallback = callback;
@@ -132,14 +132,25 @@ public class Executor {
         flutterHardStop = false;
 
         timer.schedule(new TimerTask() {
+
+
             @Override
             public void run() {
-
-
                 try {
-                    Log.e(BleScanner.TAG, "----> Start Scanner");
-                    //bluetoothAdapter.startLeScan(scanFilterList.length > 0 ? scanFilterList : null, scanCallback);
+
+                    /**
+                     if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+                     Log.e(BleScanner.TAG, "----> startScan");
+                     bluetoothLeScanner.startScan(scanFilterList, scanSettings, scanCallback);
+                     } else {
+                     Log.e(BleScanner.TAG, "-> startLeScan");
+                     bluetoothAdapter.startLeScan(uuidList.length > 0 ? uuidList : null, scanCallbackEski);
+                     }
+                     */
+
+                    Log.e(BleScanner.TAG, "----> startScan");
                     bluetoothLeScanner.startScan(scanFilterList, scanSettings, scanCallback);
+
                     bleScannerCallback.onScanning(true);
 
                 } catch (Exception e) {
@@ -152,9 +163,15 @@ public class Executor {
 
 
                     Log.e(BleScanner.TAG, "----> STOP Scanner");
-                    //bluetoothAdapter.cancelDiscovery();
-                    //bluetoothAdapter.stopLeScan(scanCallback);
                     bluetoothLeScanner.stopScan(scanCallback);
+                    /**
+                     if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+                     bluetoothLeScanner.stopScan(scanCallback);
+                     } else {
+                     //bluetoothAdapter.cancelDiscovery();
+                     bluetoothAdapter.stopLeScan(scanCallbackEski);
+                     }
+                     */
                     bleScannerCallback.onScanning(false);
 
                 } catch (InterruptedException e) {
@@ -172,21 +189,38 @@ public class Executor {
 
 
     public void stop() {
+        /**
+         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+         bluetoothLeScanner.stopScan(scanCallback);
+         } else {
+         bluetoothAdapter.cancelDiscovery();
+         bluetoothAdapter.stopLeScan(scanCallbackEski);
+         }
+         */
+        bluetoothLeScanner.stopScan(scanCallback);
+        bluetoothLeScanner.flushPendingScanResults(scanCallback);
+        bleScannerCallback.onScanning(false);
         timer.cancel();
     }
 
     public void connectDevice() {
 
-        Log.e(BleScanner.TAG, "connectGatt");
-        try {
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    bluetoothGatt = connectedBluetoothDevice.connectGatt(activity, false, bluetoothGattCallback, BluetoothDevice.TRANSPORT_LE);
-                } else {
-                    bluetoothGatt = connectedBluetoothDevice.connectGatt(activity, false, bluetoothGattCallback);
-                }
-            }, 100);
 
+        try {
+
+            Log.e(BleScanner.TAG, "connectGatt");
+            bluetoothGatt = connectedBluetoothDevice.connectGatt(activity, false, bluetoothGattCallback);
+            /**
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                Log.e(BleScanner.TAG, "connectGatt TRANSPORT_LE");
+                bluetoothGatt = connectedBluetoothDevice.connectGatt(activity, false, bluetoothGattCallback, BluetoothDevice.TRANSPORT_LE);
+            } else {
+                Log.e(BleScanner.TAG, "connectGatt");
+                bluetoothGatt = connectedBluetoothDevice.connectGatt(activity, false, bluetoothGattCallback);
+            }
+             */
+
+            if (bluetoothGatt == null) Log.e(BleScanner.TAG, "bluetoothGatt is null");
         } catch (Exception e) {
             bleScannerErrorCallback.onScanError(BleScanErrors.NOT_CONNECTED_DEVICE);
         }
@@ -310,14 +344,14 @@ public class Executor {
             switch (newState) {
                 case BluetoothProfile.STATE_CONNECTED:
                     Log.e(BleScanner.TAG, "newState: " + newState + " STATE_CONNECTED 🔗");
-
+                    bluetoothGatt = gatt;
                     bleScannerCallback.onConnectDevice(true, connectedBluetoothDevice);
                     gatt.discoverServices();
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
                     Log.e(BleScanner.TAG, "newState: " + newState + " STATE_DISCONNECTED ✂️");
                     gatt.close();
-                    new Handler().postDelayed(
+                    new Handler(activity.getMainLooper()).postDelayed(
                             () -> bleScannerCallback.onConnectDevice(false, null),
                             200);
                     break;
@@ -330,7 +364,6 @@ public class Executor {
 
             if (status == 133 || status == 257) {
                 Log.e(BleScanner.TAG, "-----> !!! onConnectionStateChange status: " + status);
-                //setTimer();
             }
         }
 

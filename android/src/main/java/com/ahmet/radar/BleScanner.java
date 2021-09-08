@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanSettings;
+import android.util.Log;
 
 import com.ahmet.radar.listener.BleScannerCallback;
 import com.ahmet.radar.listener.BleScannerErrorCallback;
@@ -40,6 +41,7 @@ public class BleScanner extends Executor {
      * @param errorCallback   Hataları yakalamak için
      */
     public BleScanner(Activity activity,
+                      UUID[] uuids,
                       List<ScanFilter> scanFilters,
                       ScanSettings scanSettings,
                       BleScannerCallback scannerCallback,
@@ -47,7 +49,7 @@ public class BleScanner extends Executor {
                       BleScannerErrorCallback errorCallback) {
 
 
-        super(activity, scanFilters, scanSettings, scannerCallback, bleServiceCallback, errorCallback);
+        super(activity,uuids, scanFilters, scanSettings, scannerCallback, bleServiceCallback, errorCallback);
 
         this.activity = activity;
         this.errorCallback = errorCallback;
@@ -61,9 +63,11 @@ public class BleScanner extends Executor {
     }
 
     public BluetoothGattService getService(String uuid) {
+        Log.d(BleScanner.TAG, "getService() UUID: " + uuid);
         try {
             return super.bluetoothGatt.getService(UUID.fromString(uuid));
         } catch (Exception e) {
+            Log.e(BleScanner.TAG, "getService() error: " + e.toString());
             return null;
         }
     }
@@ -73,10 +77,11 @@ public class BleScanner extends Executor {
             List<String> list = new ArrayList<>();
             for (BluetoothGattService service : super.bluetoothGatt.getServices()) {
                 list.add(service.getUuid().toString());
+            Log.d(BleScanner.TAG,"getServicesList() service item: "+service.getUuid().toString());
             }
-
             return list;
         } catch (Exception e) {
+            Log.e(BleScanner.TAG, "getServicesList() error: " + e.toString());
             return null;
         }
     }
@@ -90,8 +95,10 @@ public class BleScanner extends Executor {
                 list.add(characteristic.getUuid().toString());
             }
 
+            Log.d(BleScanner.TAG,"getCharacteristicsList() list length: "+list.size());
             return list;
         } catch (Exception e) {
+            Log.e(BleScanner.TAG, "getCharacteristicsList() error: " + e.toString());
             return null;
         }
     }

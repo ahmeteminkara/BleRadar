@@ -71,7 +71,6 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
     private MethodChannel channel;
 
     private BleScanner radar;
-    //private BleScanner radar;
 
     private Activity activity;
     private Context context;
@@ -102,30 +101,29 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
 
 
         List<ScanFilter> filterList = new ArrayList<>();
-        UUID[] uuids = {};
+        UUID[] uuids = new UUID[listFilterUUID.size()];
 
-        for (String uuid : listFilterUUID) {
+        for (int i = 0; i < listFilterUUID.size(); i++) {
+            String uuid = listFilterUUID.get(i);
+
             filterList.add(new ScanFilter.Builder()
                     .setServiceUuid(ParcelUuid.fromString(uuid)).build());
-            uuids[uuids.length] = UUID.fromString(uuid);
+            uuids[i] = UUID.fromString(uuid);
         }
 
         ScanSettings.Builder scanSettingsBuilder = new ScanSettings.Builder();
         scanSettingsBuilder.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-            scanSettingsBuilder.setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE);
 
 
         radar = new BleScanner(
                 activity,
+                uuids,
                 filterList,
                 scanSettingsBuilder.build(),
                 scannerCallback,
                 serviceCallback,
                 errorCallback);
 
-
-//  radar = new BleScanner(activity,uuids,scannerCallback,serviceCallback,errorCallback);
 
     }
 
@@ -420,14 +418,22 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
                                 characteristicUUID = call.argument("characteristicUUID"),
                                 serviceUUID = call.argument("serviceUUID");
 
+                        radar.getServicesList();
                         BluetoothGattService gattService = radar.getService(serviceUUID);
-                        BluetoothGattCharacteristic gattCharacteristic = gattService.getCharacteristic(UUID.fromString(characteristicUUID));
 
-                        boolean status = radar.writeCharacteristic(gattCharacteristic, data);
-                        result.success(status);
+                        if (gattService != null){
+                            BluetoothGattCharacteristic gattCharacteristic = gattService.getCharacteristic(UUID.fromString(characteristicUUID));
+
+                            boolean status = radar.writeCharacteristic(gattCharacteristic, data);
+                            result.success(status);
+                        }else{
+                            Log.e(BleScanner.TAG, "gattService is null");
+                            radar.disconnect();
+                        }
 
 
-                    } else {
+
+
                     }
                 } catch (Exception e) {
                     Log.e(BleScanner.TAG, "writeCharacteristic error: " + e.toString());

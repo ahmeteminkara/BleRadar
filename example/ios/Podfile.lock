@@ -1,22 +1,35 @@
 PODS:
-  - ble_radar (0.0.2):
+  - ble_radar (0.0.3):
     - Flutter
   - Flutter (1.0.0)
+  - MTBBarcodeScanner (5.0.11)
+  - scan_preview (0.0.1):
+    - Flutter
+    - MTBBarcodeScanner
 
 DEPENDENCIES:
   - ble_radar (from `.symlinks/plugins/ble_radar/ios`)
   - Flutter (from `Flutter`)
+  - scan_preview (from `.symlinks/plugins/scan_preview/ios`)
+
+SPEC REPOS:
+  trunk:
+    - MTBBarcodeScanner
 
 EXTERNAL SOURCES:
   ble_radar:
     :path: ".symlinks/plugins/ble_radar/ios"
   Flutter:
     :path: Flutter
+  scan_preview:
+    :path: ".symlinks/plugins/scan_preview/ios"
 
 SPEC CHECKSUMS:
-  ble_radar: 519da890532f7586b28a6d75eab1933f9fa7841a
+  ble_radar: ac6a09526551d54b043f08c2933a79c0cdaa4aa1
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
+  MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
+  scan_preview: 7a4f12dd850422dd8dc693da7b74e0ddbf5f6647
 
-PODFILE CHECKSUM: 9db19232d14b595bca37ec9166d4737a161469e3
+PODFILE CHECKSUM: 1349b0fda0a45c6296bd11584befb99135f7ece6
 
 COCOAPODS: 1.10.1

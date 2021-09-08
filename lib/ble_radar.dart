@@ -75,72 +75,104 @@ class BleRadar {
   final MethodChannel _channel = const MethodChannel('ble_radar');
 
   Future start({@required int maxRssi, @required bool autoConnect, bool vibration = false, List<String> filterUUID = const []}) async {
-    await _channel.invokeMethod("startScan", {
-      "maxRssi": maxRssi,
-      "autoConnect": autoConnect,
-      "vibration": vibration,
-      "filterUUID": filterUUID,
-    });
+    try {
+      await _channel.invokeMethod("startScan", {
+        "maxRssi": maxRssi,
+        "autoConnect": autoConnect,
+        "vibration": vibration,
+        "filterUUID": filterUUID,
+      });
+    } catch (e) {
+      print("flutter startScan error: $e");
+    }
   }
 
   Future<void> stop() async {
-    await _channel.invokeMethod("stopScan");
+    try {
+      await _channel.invokeMethod("stopScan");
+    } catch (e) {
+      print("flutter stop error: $e");
+    }
   }
 
   Future<void> connectDevice() async {
-    await _channel.invokeMethod("connectDevice");
+    try {
+      await _channel.invokeMethod("connectDevice");
+    } catch (e) {
+      print("flutter connectDevice error: $e");
+    }
   }
 
   Future<void> disconnectDevice() async {
-    await _channel.invokeMethod("disconnectDevice");
+    try {
+      await _channel.invokeMethod("disconnectDevice");
+    } catch (e) {
+      print("flutter disconnectDevice error: $e");
+    }
   }
 
   Future<List<String>> getServices() async {
-    return await _channel.invokeMethod("getServices");
+    try {
+      return await _channel.invokeMethod("getServices");
+    } catch (e) {
+      print("flutter getServices error: $e");
+    }
   }
 
   Future<List<String>> getCharacteristics(String serviceUUID) async {
-    return await _channel.invokeMethod("getCharacteristics", {"serviceUUID": serviceUUID});
+    try {
+      return await _channel.invokeMethod("getCharacteristics", {"serviceUUID": serviceUUID});
+    } catch (e) {
+      print("flutter getCharacteristics error: $e");
+    }
   }
 
   Future<bool> writeCharacteristic(String serviceUUID, String characteristicUUID, String data) async {
-    return await _channel.invokeMethod("writeCharacteristic", {
-      "serviceUUID": serviceUUID,
-      "characteristicUUID": characteristicUUID,
-      "data": data,
-    });
+    try {
+      return await _channel.invokeMethod("writeCharacteristic", {
+        "serviceUUID": serviceUUID,
+        "characteristicUUID": characteristicUUID,
+        "data": data,
+      });
+    } catch (e) {
+      print("flutter writeCharacteristic error: $e");
+    }
   }
 
   Future<void> readCharacteristic(String serviceUUID, String characteristicUUID) async {
+    try{
     await _channel.invokeMethod("readCharacteristic", {
       "serviceUUID": serviceUUID,
       "characteristicUUID": characteristicUUID,
     });
+    } catch (e) {
+      print("flutter readCharacteristic error: $e");
+    }
   }
 
   Stream<bool> get isEnableBluetooth => _isEnableBluetoothController.stream;
-  final _isEnableBluetoothController = StreamController<bool>();
+  final _isEnableBluetoothController = StreamController<bool>.broadcast();
 
   Stream<bool> get isEnableLocation => _isEnableLocationController.stream;
-  final _isEnableLocationController = StreamController<bool>();
+  final _isEnableLocationController = StreamController<bool>.broadcast();
 
   Stream<bool> get isScanning => _isScanningController.stream;
-  final _isScanningController = StreamController<bool>();
+  final _isScanningController = StreamController<bool>.broadcast();
 
   Stream<BluetoothDevice> get onDetectDevice => _onDetectDeviceController.stream;
-  final _onDetectDeviceController = StreamController<BluetoothDevice>();
+  final _onDetectDeviceController = StreamController<BluetoothDevice>.broadcast();
 
   Stream<bool> get isConnectedDevice => _isConnectedDeviceController.stream;
-  final _isConnectedDeviceController = StreamController<bool>();
+  final _isConnectedDeviceController = StreamController<bool>.broadcast();
 
   Stream<List<String>> get onServicesDiscovered => _onServicesDiscoveredController.stream;
-  final _onServicesDiscoveredController = StreamController<List<String>>();
+  final _onServicesDiscoveredController = StreamController<List<String>>.broadcast();
 
   Stream<String> get onReadCharacteristic => _onReadCharacteristicController.stream;
-  final _onReadCharacteristicController = StreamController<String>();
+  final _onReadCharacteristicController = StreamController<String>.broadcast();
 
   Stream<bool> get onWriteCharacteristic => _onWriteCharacteristicController.stream;
-  final _onWriteCharacteristicController = StreamController<bool>();
+  final _onWriteCharacteristicController = StreamController<bool>.broadcast();
 
   void dispose() {
     if (subLocationStatusStream != null) subLocationStatusStream.cancel();
