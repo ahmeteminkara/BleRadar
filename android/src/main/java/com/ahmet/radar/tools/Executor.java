@@ -346,18 +346,18 @@ public class Executor {
                     Log.e(BleScanner.TAG, "newState: " + newState + " STATE_CONNECTED 🔗");
                     //bluetoothGatt = gatt;
                     bleScannerCallback.onConnectDevice(true, connectedBluetoothDevice);
-                    gatt.discoverServices();
+                    bluetoothGatt.discoverServices();
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
                     Log.e(BleScanner.TAG, "newState: " + newState + " STATE_DISCONNECTED ✂️");
-                    gatt.close();
+                    bluetoothGatt.close();
                     new Handler(activity.getMainLooper()).postDelayed(
                             () -> bleScannerCallback.onConnectDevice(false, null),
                             200);
                     break;
                 default:
                     Log.e(BleScanner.TAG, "newState: --");
-                    gatt.close();
+                    bluetoothGatt.close();
                     bleScannerErrorCallback.onScanError(BleScanErrors.NOT_CONNECTED_DEVICE);
                     break;
             }
