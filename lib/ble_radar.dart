@@ -117,6 +117,7 @@ class BleRadar {
     } catch (e) {
       print("flutter getServices error: $e");
     }
+    return [];
   }
 
   Future<List<String>> getCharacteristics(String serviceUUID) async {
@@ -125,6 +126,7 @@ class BleRadar {
     } catch (e) {
       print("flutter getCharacteristics error: $e");
     }
+    return [];
   }
 
   Future<bool> writeCharacteristic(String serviceUUID, String characteristicUUID, String data) async {
@@ -136,15 +138,16 @@ class BleRadar {
       });
     } catch (e) {
       print("flutter writeCharacteristic error: $e");
+      return false;
     }
   }
 
   Future<void> readCharacteristic(String serviceUUID, String characteristicUUID) async {
-    try{
-    await _channel.invokeMethod("readCharacteristic", {
-      "serviceUUID": serviceUUID,
-      "characteristicUUID": characteristicUUID,
-    });
+    try {
+      await _channel.invokeMethod("readCharacteristic", {
+        "serviceUUID": serviceUUID,
+        "characteristicUUID": characteristicUUID,
+      });
     } catch (e) {
       print("flutter readCharacteristic error: $e");
     }

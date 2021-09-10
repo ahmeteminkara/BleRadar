@@ -139,7 +139,7 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
         Log.e(BleScanner.TAG, "onAttachedToActivity");
         this.activity = binding.getActivity();
 
-        permissionOK();
+        //permissionOK();
 
         binding.addActivityResultListener(this);
         binding.addRequestPermissionsResultListener(this);
@@ -418,7 +418,6 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
                                 characteristicUUID = call.argument("characteristicUUID"),
                                 serviceUUID = call.argument("serviceUUID");
 
-                        radar.getServicesList();
                         BluetoothGattService gattService = radar.getService(serviceUUID);
 
                         if (gattService != null){
@@ -428,14 +427,12 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
                             result.success(status);
                         }else{
                             Log.e(BleScanner.TAG, "gattService is null");
-                            radar.disconnect();
+                            result.success(false);
                         }
-
-
-
-
                     }
+                    result.success(false);
                 } catch (Exception e) {
+                    result.success(false);
                     Log.e(BleScanner.TAG, "writeCharacteristic error: " + e.toString());
                 }
                 break;

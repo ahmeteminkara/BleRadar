@@ -49,7 +49,7 @@ public class BleScanner extends Executor {
                       BleScannerErrorCallback errorCallback) {
 
 
-        super(activity,uuids, scanFilters, scanSettings, scannerCallback, bleServiceCallback, errorCallback);
+        super(activity, uuids, scanFilters, scanSettings, scannerCallback, bleServiceCallback, errorCallback);
 
         this.activity = activity;
         this.errorCallback = errorCallback;
@@ -65,7 +65,7 @@ public class BleScanner extends Executor {
     public BluetoothGattService getService(String uuid) {
         Log.d(BleScanner.TAG, "getService() UUID: " + uuid);
         try {
-            return super.bluetoothGatt.getService(UUID.fromString(uuid));
+            return this.bluetoothGatt.getService(UUID.fromString(uuid));
         } catch (Exception e) {
             Log.e(BleScanner.TAG, "getService() error: " + e.toString());
             return null;
@@ -73,42 +73,42 @@ public class BleScanner extends Executor {
     }
 
     public List<String> getServicesList() {
+        List<String> list = new ArrayList<>();
         try {
-            List<String> list = new ArrayList<>();
-            for (BluetoothGattService service : super.bluetoothGatt.getServices()) {
+            for (BluetoothGattService service : this.bluetoothGatt.getServices()) {
                 list.add(service.getUuid().toString());
-            Log.d(BleScanner.TAG,"getServicesList() service item: "+service.getUuid().toString());
             }
             return list;
         } catch (Exception e) {
             Log.e(BleScanner.TAG, "getServicesList() error: " + e.toString());
-            return null;
+            return list;
         }
     }
 
     public List<String> getCharacteristicsList(String serviceUUID) {
+        List<String> list = new ArrayList<>();
         try {
             BluetoothGattService service = this.getService(serviceUUID);
 
-            List<String> list = new ArrayList<>();
-            for (BluetoothGattCharacteristic characteristic : service.getCharacteristics()) {
-                list.add(characteristic.getUuid().toString());
+            if (service != null) {
+                for (BluetoothGattCharacteristic characteristic : service.getCharacteristics()) {
+                    list.add(characteristic.getUuid().toString());
+                }
+                Log.d(BleScanner.TAG, "getCharacteristicsList() list length: " + list.size());
             }
-
-            Log.d(BleScanner.TAG,"getCharacteristicsList() list length: "+list.size());
             return list;
         } catch (Exception e) {
             Log.e(BleScanner.TAG, "getCharacteristicsList() error: " + e.toString());
-            return null;
+            return list;
         }
     }
 
     public boolean readCharacteristic(BluetoothGattCharacteristic characteristic) {
-        return super.bluetoothGatt.readCharacteristic(characteristic);
+        return this.bluetoothGatt.readCharacteristic(characteristic);
     }
 
     public boolean writeCharacteristic(BluetoothGattCharacteristic characteristic, String data) {
-        if (!super.bluetoothGatt.getServices().contains(characteristic.getService())) {
+        if (!this.bluetoothGatt.getServices().contains(characteristic.getService())) {
             return false;
         }
         return writeCharacteristic(characteristic, data.getBytes());
@@ -117,6 +117,6 @@ public class BleScanner extends Executor {
     public boolean writeCharacteristic(BluetoothGattCharacteristic characteristic, byte[] data) {
         characteristic.setValue(data);
         characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT);
-        return super.bluetoothGatt.writeCharacteristic(characteristic);
+        return this.bluetoothGatt.writeCharacteristic(characteristic);
     }
 }

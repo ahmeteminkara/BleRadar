@@ -20,7 +20,7 @@
         
         var isScanning:Bool = false
         
-        var bleRadar:BleRadar!
+        var bleRadar:BleRadar?
         
         var eventSinkBluetoothStatus:BleEventSink!
         var eventSinkScanningStatus:BleEventSink!
@@ -33,7 +33,6 @@
         public override init() {
             super.init()
             
-            bleRadar = BleRadar(self)
             
             eventSinkBluetoothStatus = BleEventSink()
             eventSinkScanningStatus = BleEventSink()
@@ -51,21 +50,25 @@
         
         @objc private func applicationDidBecomeActive(notification: NSNotification) {
             self.startMethod()
-           print("BleRadar -> ACTIVE")
+            print("BleRadar -> ACTIVE")
         }
         
         
         @objc private func applicationDidEnterBackground(notification: NSNotification) {
-            self.bleRadar.stopScan()
-           print("BleRadar -> BACKGROUND")
+            self.bleRadar?.stopScan()
+            print("BleRadar -> BACKGROUND")
         }
         
         func startMethod(){
-            self.bleRadar.startScan(
+            if bleRadar == nil {
+                bleRadar = BleRadar(self)
+            }
+            
+            self.bleRadar!.startScan(
                 filter: self.filterUUID,
                 maxRssi: self.maxRssi,
                 vibrate:self.vibration)
-           print("BleRadar -> startMethod()")
+            print("BleRadar -> startMethod()")
         }
         
         public static func register(with registrar: FlutterPluginRegistrar) {
@@ -106,7 +109,7 @@
                 
                 guard let args = call.arguments else {
                     return
-                  }
+                }
                 if let myArgs = args as? [String: Any],
                    let _autoConnect = myArgs["autoConnect"] as? Bool,
                    let _filterUUID = myArgs["filterUUID"] as? [String],
@@ -126,8 +129,8 @@
                 
                 break
             case "stopScan":
-                bleRadar.stoptimerScanner()
-                bleRadar.stopScan()
+                bleRadar?.stoptimerScanner()
+                bleRadar?.stopScan()
                 break
             case "isOpenBluetooth":
                 result(isOpenBluetooth)
@@ -136,13 +139,13 @@
                 result(isScanning)
                 break
             case "connectDevice":
-                bleRadar.connectDevice()
+                bleRadar?.connectDevice()
                 break
             case "disconnectDevice":
-                bleRadar.disconnectDevice()
+                bleRadar?.disconnectDevice()
                 break
             case "readCharacteristic":
-               print("BleRadar -> readCharacteristic")
+                print("BleRadar -> readCharacteristic")
                 
                 actionType = ACTION_READ
                 
@@ -153,13 +156,13 @@
                 if let myArgs = args as? [String: Any]{
                     callArguments = myArgs
                     let service = myArgs["serviceUUID"] as? String ?? ""
-                    self.bleRadar.connectService(serviceUUID: CBUUID.init(string: service))
+                    self.bleRadar?.connectService(serviceUUID: CBUUID.init(string: service))
                 }
                 
                 break
             case "writeCharacteristic":
                 actionType = ACTION_WRITE
-               print("BleRadar -> writeCharacteristic")
+                print("BleRadar -> writeCharacteristic")
                 
                 guard let args = call.arguments else {
                     break
@@ -167,7 +170,7 @@
                 if let myArgs = args as? [String: Any]{
                     callArguments = myArgs
                     let service = myArgs["serviceUUID"] as? String ?? ""
-                    self.bleRadar.connectService(serviceUUID: CBUUID.init(string: service))
+                    self.bleRadar?.connectService(serviceUUID: CBUUID.init(string: service))
                 }
                 
                 break
@@ -223,7 +226,7 @@
             }
             
             let sendData = stringify(json: servicesUUIDList)
-           print("BleRadar -> sendData: " + sendData)
+            print("BleRadar -> sendData: " + sendData)
             
             eventSinkServicesDiscovered.eventSink?(sendData)
             
@@ -238,10 +241,13 @@
                 let characteristic = callArguments["characteristicUUID"] as? String ?? ""
                 
                 
-                let status = bleRadar.readCharacteristicValue(
+                let status = self.bleRadar?.readCharacteristicValue(
                     characteristicUUID: CBUUID.init(string: characteristic))
                 
-               print("BleRadar -> readCharacteristic ",status)
+                if let _status = status {
+                    print("BleRadar -> readCharacteristic ",_status)
+                }
+                
                 
                 break
             case ACTION_WRITE:
@@ -250,11 +256,13 @@
                 let data = callArguments["data"] as? String ?? ""
                 
                 
-                let status = bleRadar.writeCharacteristicValue(
+                let status = self.bleRadar?.writeCharacteristicValue(
                     characteristicUUID: CBUUID.init(string: characteristic),
                     data: data
                 )
-               print("BleRadar -> readCharacteristic ",status)
+                if let _status = status {
+                    print("BleRadar -> writeCharacteristic ",_status)
+                }
                 
                 
                 
