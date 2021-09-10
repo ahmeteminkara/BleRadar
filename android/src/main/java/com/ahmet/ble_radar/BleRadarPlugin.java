@@ -568,31 +568,12 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
         if (requestCode == BleScanner.bluetoothRequestCode) {
             if (resultCode == Activity.RESULT_OK) {
                 activity.runOnUiThread(this::permissionOK);
-                Toast.makeText(activity, "Bluetooth açıldı", Toast.LENGTH_SHORT).show();
-            } else {
-                final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                builder.setTitle("Uygulamanın Bluetooth erişimine ihtiyacı var");
-                builder.setMessage("Bu uygulamanın çevre birimlerini" +
-                        " algılayabilmesi için lütfen Bluetooth'u açınız");
-                builder.setPositiveButton(android.R.string.ok, null);
-                builder.setOnDismissListener(dialog -> activity.runOnUiThread(this::permissionOK));
-                builder.show();
-
             }
         } else if (requestCode == BleScanner.fineLocationRequestCode) {
 
             Log.e(BleScanner.TAG, "locationRequestCode: " + resultCode);
             if (DeviceControls.isOpenLocation(activity)) {
                 activity.runOnUiThread(this::permissionOK);
-                Toast.makeText(activity, "Konum açıldı", Toast.LENGTH_SHORT).show();
-            } else {
-                final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                builder.setTitle("Uygulamanın konum erişimine ihtiyacı var");
-                builder.setMessage("Bu uygulamanın çevre birimlerini" +
-                        " algılayabilmesi için lütfen konumu açınız");
-                builder.setPositiveButton(android.R.string.ok, null);
-                builder.setOnDismissListener(dialog -> activity.runOnUiThread(this::permissionOK));
-                builder.show();
             }
 
         }
@@ -605,30 +586,14 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
         if (requestCode == BleScanner.fineLocationRequestCode) {
 
 
-            if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-
-                final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                builder.setTitle("Konum erişimi reddedildi");
-                builder.setMessage("Konum erişimi izni vermeniz gerekmektedir");
-                builder.setPositiveButton(android.R.string.ok, null);
-                builder.setOnDismissListener(dialog -> activity.runOnUiThread(this::permissionOK));
-                builder.show();
-            } else {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 activity.runOnUiThread(this::permissionOK);
             }
 
         }else if (requestCode == BleScanner.bgLocationRequestCode) {
 
 
-            if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-
-                final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                builder.setTitle("Konum erişimi reddedildi");
-                builder.setMessage("Konum erişimi izni vermeniz gerekmektedir");
-                builder.setPositiveButton(android.R.string.ok, null);
-                builder.setOnDismissListener(dialog -> activity.runOnUiThread(this::permissionOK));
-                builder.show();
-            } else {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 activity.runOnUiThread(this::permissionOK);
             }
 
