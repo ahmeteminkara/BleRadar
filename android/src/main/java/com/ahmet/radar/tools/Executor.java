@@ -214,7 +214,11 @@ public class Executor {
              */
 
             bluetoothGatt = connectedBluetoothDevice.connectGatt(activity, false, bluetoothGattCallback);
-            if (bluetoothGatt == null) Log.e(BleScanner.TAG, "bluetoothGatt is null");
+            if (bluetoothGatt == null) {
+                Log.e(BleScanner.TAG, "bluetoothGatt is null");
+                disconnect();
+            }
+
         } catch (Exception e) {
             bleScannerErrorCallback.onScanError(BleScanErrors.NOT_CONNECTED_DEVICE);
         }

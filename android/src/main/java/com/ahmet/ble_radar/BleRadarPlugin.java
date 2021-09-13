@@ -430,7 +430,6 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
                             result.success(false);
                         }
                     }
-                    result.success(false);
                 } catch (Exception e) {
                     result.success(false);
                     Log.e(BleScanner.TAG, "writeCharacteristic error: " + e.toString());
