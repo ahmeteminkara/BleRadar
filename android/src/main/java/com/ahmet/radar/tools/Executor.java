@@ -117,8 +117,7 @@ public class Executor {
 
             BluetoothManager bluetoothManager = (BluetoothManager) activity.getSystemService(Context.BLUETOOTH_SERVICE);
             bluetoothAdapter = bluetoothManager.getAdapter();
-
-
+            bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
 
         } catch (Exception e) {
             Log.e(BleScanner.TAG, "Executer: " + e.getMessage());
