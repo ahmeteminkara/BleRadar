@@ -418,6 +418,9 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
                                 characteristicUUID = call.argument("characteristicUUID"),
                                 serviceUUID = call.argument("serviceUUID");
 
+                        radar.getServicesList();
+
+
                         BluetoothGattService gattService = radar.getService(serviceUUID);
 
                         if (gattService != null){
@@ -431,7 +434,6 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
                         }
                     }
                 } catch (Exception e) {
-                    result.success(false);
                     Log.e(BleScanner.TAG, "writeCharacteristic error: " + e.toString());
                 }
                 break;
@@ -506,7 +508,7 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
                     if (eventSinkServicesDiscovered != null)
                         activity.runOnUiThread(() -> eventSinkServicesDiscovered.success(json.toString()));
                 } catch (Exception e) {
-
+                    Log.e(BleScanner.TAG, "onDetectServices -> error: " + e);
                 }
 
                 //startReadValue();
@@ -528,9 +530,7 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
 
         @Override
         public void onCharacteristicWrite(boolean status, UUID serviceUUID, BluetoothGattCharacteristic characteristic) {
-            if (status) {
-                Log.d(BleScanner.TAG, "onCharacteristicWrite success");
-            } else {
+            if (!status) {
                 Log.e(BleScanner.TAG, "onCharacteristicWrite failed");
             }
             if (eventSinkWriteCharacteristic != null)

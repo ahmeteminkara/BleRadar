@@ -65,7 +65,7 @@ public class BleScanner extends Executor {
     public BluetoothGattService getService(String uuid) {
         Log.d(BleScanner.TAG, "getService() UUID: " + uuid);
         try {
-            return this.bluetoothGatt.getService(UUID.fromString(uuid));
+            return super.bluetoothGatt.getService(UUID.fromString(uuid));
         } catch (Exception e) {
             Log.e(BleScanner.TAG, "getService() error: " + e.toString());
             return null;
@@ -77,6 +77,12 @@ public class BleScanner extends Executor {
         try {
             for (BluetoothGattService service : this.bluetoothGatt.getServices()) {
                 list.add(service.getUuid().toString());
+                Log.e(BleScanner.TAG, "this.getServices() item : " + service.getUuid().toString());
+            }
+            Log.d(BleScanner.TAG, "-------------------------");
+            for (BluetoothGattService service : super.bluetoothGatt.getServices()) {
+                list.add(service.getUuid().toString());
+                Log.e(BleScanner.TAG, "super.getServices() item : " + service.getUuid().toString());
             }
             return list;
         } catch (Exception e) {

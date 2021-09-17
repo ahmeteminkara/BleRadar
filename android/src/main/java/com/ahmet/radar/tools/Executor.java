@@ -31,7 +31,17 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 
+import static android.bluetooth.BluetoothGatt.GATT_CONNECTION_CONGESTED;
+import static android.bluetooth.BluetoothGatt.GATT_FAILURE;
+import static android.bluetooth.BluetoothGatt.GATT_INSUFFICIENT_AUTHENTICATION;
+import static android.bluetooth.BluetoothGatt.GATT_INSUFFICIENT_ENCRYPTION;
+import static android.bluetooth.BluetoothGatt.GATT_INVALID_ATTRIBUTE_LENGTH;
+import static android.bluetooth.BluetoothGatt.GATT_INVALID_OFFSET;
+import static android.bluetooth.BluetoothGatt.GATT_READ_NOT_PERMITTED;
+import static android.bluetooth.BluetoothGatt.GATT_REQUEST_NOT_SUPPORTED;
 import static android.bluetooth.BluetoothGatt.GATT_SUCCESS;
+import static android.bluetooth.BluetoothGatt.GATT_WRITE_NOT_PERMITTED;
+import static android.bluetooth.BluetoothProfile.GATT_SERVER;
 
 public class Executor {
     /**
@@ -105,10 +115,10 @@ public class Executor {
             this.bleServiceCallback = bleServiceCallback;
             this.bleScannerErrorCallback = errorCallback;
 
-            BluetoothManager bluetoothManager = (BluetoothManager)
-                    activity.getSystemService(Context.BLUETOOTH_SERVICE);
+            BluetoothManager bluetoothManager = (BluetoothManager) activity.getSystemService(Context.BLUETOOTH_SERVICE);
             bluetoothAdapter = bluetoothManager.getAdapter();
-            bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
+
+
 
         } catch (Exception e) {
             Log.e(BleScanner.TAG, "Executer: " + e.getMessage());
@@ -139,7 +149,7 @@ public class Executor {
                 try {
 
 
-                    /**
+                    /*
                      if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
                      Log.e(BleScanner.TAG, "----> startScan");
                      bluetoothLeScanner.startScan(scanFilterList, scanSettings, scanCallback);
@@ -164,7 +174,7 @@ public class Executor {
 
                     Log.e(BleScanner.TAG, "----> STOP Scanner");
                     bluetoothLeScanner.stopScan(scanCallback);
-                    /**
+                    /*
                      if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
                      bluetoothLeScanner.stopScan(scanCallback);
                      } else {
@@ -186,7 +196,7 @@ public class Executor {
 
 
     public void stop() {
-        /**
+        /*
          if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
          bluetoothLeScanner.stopScan(scanCallback);
          } else {
@@ -200,34 +210,35 @@ public class Executor {
 
     public void connectDevice() {
 
-        Log.e(BleScanner.TAG, "connectGatt");
 
         try {
-            /**
-             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-             Log.e(BleScanner.TAG, "connectGatt TRANSPORT_LE");
-             bluetoothGatt = connectedBluetoothDevice.connectGatt(activity, false, bluetoothGattCallback, BluetoothDevice.TRANSPORT_LE);
-             } else {
-             Log.e(BleScanner.TAG, "connectGatt");
-             bluetoothGatt = connectedBluetoothDevice.connectGatt(activity, false, bluetoothGattCallback);
-             }
-             */
+            /*
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                Log.e(BleScanner.TAG, "connectGatt TRANSPORT_LE");
+                bluetoothGatt = connectedBluetoothDevice.connectGatt(activity, false, bluetoothGattCallback, BluetoothDevice.TRANSPORT_LE);
+            } else {
+                Log.e(BleScanner.TAG, "connectGatt");
+                bluetoothGatt = connectedBluetoothDevice.connectGatt(activity, false, bluetoothGattCallback);
+            }
 
+             */
             bluetoothGatt = connectedBluetoothDevice.connectGatt(activity, false, bluetoothGattCallback);
             if (bluetoothGatt == null) {
                 Log.e(BleScanner.TAG, "bluetoothGatt is null");
-                disconnect();
+                bleScannerErrorCallback.onScanError(BleScanErrors.NOT_CONNECTED_DEVICE);
+                //disconnect();
             }
 
         } catch (Exception e) {
+            Log.e(BleScanner.TAG, "connectGatt error: " + e.getMessage());
             bleScannerErrorCallback.onScanError(BleScanErrors.NOT_CONNECTED_DEVICE);
         }
 
     }
 
     public void disconnect() {
-
         bluetoothGatt.disconnect();
+        bluetoothGatt.close();
         bluetoothGatt = null;
         connectedBluetoothDevice = null;
         bleScannerCallback.onConnectDevice(false, null);
@@ -326,30 +337,24 @@ public class Executor {
             switch (newState) {
                 case BluetoothProfile.STATE_CONNECTED:
                     Log.e(BleScanner.TAG, "newState: " + newState + " STATE_CONNECTED 🔗");
-                    //bluetoothGatt = gatt;
+                    bluetoothGatt = gatt;
                     bleScannerCallback.onConnectDevice(true, connectedBluetoothDevice);
-                    bluetoothGatt.discoverServices();
+                    gatt.discoverServices();
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
                     Log.e(BleScanner.TAG, "newState: " + newState + " STATE_DISCONNECTED ✂️");
-                    new Handler(activity.getMainLooper()).postDelayed(
-                            () -> bleScannerCallback.onConnectDevice(false, null),
-                            200);
+                    new Handler(activity.getMainLooper()).postDelayed(() -> bleScannerCallback.onConnectDevice(false, null), 200);
                     break;
                 case BluetoothProfile.STATE_CONNECTING:
                     Log.e(BleScanner.TAG, "newState: STATE_CONNECTING");
                     break;
                 default:
-                    Log.e(BleScanner.TAG, "newState: --");
+                    Log.e(BleScanner.TAG, "newState: " + newState);
                     bleScannerErrorCallback.onScanError(BleScanErrors.NOT_CONNECTED_DEVICE);
                     break;
             }
 
-            if (status == 133 || status == 257) {
-                Log.e(BleScanner.TAG, "-----> !!! onConnectionStateChange status: " + status);
-                bleScannerErrorCallback.onScanError(BleScanErrors.NOT_CONNECTED_DEVICE);
-                disconnect();
-            }
+
         }
 
 
@@ -375,6 +380,47 @@ public class Executor {
         public void onCharacteristicWrite(BluetoothGatt gatt,
                                           BluetoothGattCharacteristic characteristic,
                                           int status) {
+
+
+            switch (status) {
+                case GATT_SUCCESS:
+                    Log.d(BleScanner.TAG, "onCharacteristicWrite GATT_SUCCESS");
+                    break;
+                case GATT_CONNECTION_CONGESTED:
+                    Log.d(BleScanner.TAG, "onCharacteristicWrite GATT_CONNECTION_CONGESTED");
+                    break;
+                case GATT_FAILURE:
+                    Log.d(BleScanner.TAG, "onCharacteristicWrite GATT_FAILURE");
+                    break;
+                case GATT_INSUFFICIENT_AUTHENTICATION:
+                    Log.d(BleScanner.TAG, "onCharacteristicWrite GATT_INSUFFICIENT_AUTHENTICATION");
+                    break;
+                case GATT_INSUFFICIENT_ENCRYPTION:
+                    Log.d(BleScanner.TAG, "onCharacteristicWrite GATT_INSUFFICIENT_ENCRYPTION");
+                    break;
+                case GATT_INVALID_ATTRIBUTE_LENGTH:
+                    Log.d(BleScanner.TAG, "onCharacteristicWrite GATT_INVALID_ATTRIBUTE_LENGTH");
+                    break;
+                case GATT_INVALID_OFFSET:
+                    Log.d(BleScanner.TAG, "onCharacteristicWrite GATT_INVALID_OFFSET");
+                    break;
+                case GATT_READ_NOT_PERMITTED:
+                    Log.d(BleScanner.TAG, "onCharacteristicWrite GATT_READ_NOT_PERMITTED");
+                    break;
+                case GATT_REQUEST_NOT_SUPPORTED:
+                    Log.d(BleScanner.TAG, "onCharacteristicWrite GATT_REQUEST_NOT_SUPPORTED");
+                    break;
+                case GATT_WRITE_NOT_PERMITTED:
+                    Log.d(BleScanner.TAG, "onCharacteristicWrite GATT_WRITE_NOT_PERMITTED");
+                    break;
+                case GATT_SERVER:
+                    Log.d(BleScanner.TAG, "onCharacteristicWrite GATT_SERVER");
+                    break;
+                default:
+                    Log.d(BleScanner.TAG, "onCharacteristicWrite status: " + status);
+                    break;
+            }
+
             if (status == GATT_SUCCESS) {
                 bleServiceCallback.onCharacteristicWrite(true, characteristic.getService().getUuid(), characteristic);
             } else {
