@@ -87,13 +87,13 @@ public class Executor {
 
     public BluetoothGatt bluetoothGatt;
 
-    private BluetoothAdapter bluetoothAdapter;
-
     private BluetoothLeScanner bluetoothLeScanner;
 
     boolean flutterHardStop = false;
 
-    long restartDelaySecond = 2000;
+    final long restartDelaySecond = 4000;
+    final double startStopDiff = restartDelaySecond * 0.7;
+
 
     Timer timer = new Timer();
 
@@ -105,7 +105,6 @@ public class Executor {
             BleScannerCallback callback,
             BleServiceCallback bleServiceCallback,
             BleScannerErrorCallback errorCallback) {
-
         try {
             this.activity = activity;
             this.uuidList = uuidList;
@@ -116,7 +115,7 @@ public class Executor {
             this.bleScannerErrorCallback = errorCallback;
 
             BluetoothManager bluetoothManager = (BluetoothManager) activity.getSystemService(Context.BLUETOOTH_SERVICE);
-            bluetoothAdapter = bluetoothManager.getAdapter();
+            BluetoothAdapter bluetoothAdapter = bluetoothManager.getAdapter();
             bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
 
         } catch (Exception e) {
@@ -168,7 +167,7 @@ public class Executor {
                 }
 
                 try {
-                    Thread.sleep((long) (restartDelaySecond * 0.6));
+                    Thread.sleep((long) startStopDiff);
 
 
                     Log.e(BleScanner.TAG, "----> STOP Scanner");
@@ -225,7 +224,7 @@ public class Executor {
             if (bluetoothGatt == null) {
                 Log.e(BleScanner.TAG, "bluetoothGatt is null");
                 bleScannerErrorCallback.onScanError(BleScanErrors.NOT_CONNECTED_DEVICE);
-                //disconnect();
+                disconnect();
             }
 
         } catch (Exception e) {
@@ -236,7 +235,7 @@ public class Executor {
     }
 
     public void disconnect() {
-        bluetoothGatt.disconnect();
+        //bluetoothGatt.disconnect();
         bluetoothGatt.close();
         bluetoothGatt = null;
         connectedBluetoothDevice = null;
@@ -264,7 +263,12 @@ public class Executor {
             if (result.getRssi() < 0 && result.getRssi() > maxRssi) {
                 Log.d(BleScanner.TAG, "cihaz bulundu -: " + result.getDevice().getName() + ", " + result.getRssi());
 
-                connectedBluetoothDevice = result.getDevice();
+                BluetoothManager bluetoothManager = (BluetoothManager) activity.getSystemService(Context.BLUETOOTH_SERVICE);
+                BluetoothAdapter bluetoothAdapter = bluetoothManager.getAdapter();
+                connectedBluetoothDevice = bluetoothAdapter.getRemoteDevice(result.getDevice().getAddress());
+
+                //connectedBluetoothDevice = result.getDevice();
+
                 if (vibration) startVibration();
                 boolean autoConnect = bleScannerCallback.onDetectDevice(connectedBluetoothDevice, result.getRssi());
                 if (autoConnect) {
@@ -342,6 +346,7 @@ public class Executor {
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
                     Log.e(BleScanner.TAG, "newState: " + newState + " STATE_DISCONNECTED ✂️");
+                    //gatt.close();
                     new Handler(activity.getMainLooper()).postDelayed(() -> bleScannerCallback.onConnectDevice(false, null), 200);
                     break;
                 case BluetoothProfile.STATE_CONNECTING:
@@ -370,6 +375,7 @@ public class Executor {
                 bleServiceCallback.onDetectServices(true, gatt);
             } else {
                 bleServiceCallback.onDetectServices(false, null);
+                disconnect();
             }
 
 

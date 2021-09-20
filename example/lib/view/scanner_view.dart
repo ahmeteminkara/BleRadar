@@ -23,6 +23,8 @@ class _ScannerViewState extends State<ScannerView> {
   List<String> log = [];
   ScrollController logController;
 
+  bool get isAutoConnect => true;
+
   @override
   void initState() {
     super.initState();
@@ -34,8 +36,8 @@ class _ScannerViewState extends State<ScannerView> {
   startMethod() {
     setState(() => log.clear());
     bleRadar.start(
-      maxRssi: -45,
-      autoConnect: false,
+      maxRssi: Platform.isAndroid ? -50 : -45,
+      autoConnect: isAutoConnect,
       filterUUID: ["99999999-8888-7777-6666-555555555555"],
     );
     addLog("bleRadar.start");
@@ -75,10 +77,11 @@ class _ScannerViewState extends State<ScannerView> {
       setState(() {
         bluetoothDevice = device;
       });
-      bleRadar.stop();
-      Timer(Duration(seconds: 3), () {
+
+      if (!isAutoConnect) {
+        bleRadar.stop();
         bleRadar.connectDevice();
-      });
+      }
     });
 
     bleRadar.isConnectedDevice.listen((status) {

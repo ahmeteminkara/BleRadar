@@ -79,11 +79,7 @@ public class BleScanner extends Executor {
                 list.add(service.getUuid().toString());
                 Log.e(BleScanner.TAG, "this.getServices() item : " + service.getUuid().toString());
             }
-            Log.d(BleScanner.TAG, "-------------------------");
-            for (BluetoothGattService service : super.bluetoothGatt.getServices()) {
-                list.add(service.getUuid().toString());
-                Log.e(BleScanner.TAG, "super.getServices() item : " + service.getUuid().toString());
-            }
+
             return list;
         } catch (Exception e) {
             Log.e(BleScanner.TAG, "getServicesList() error: " + e.toString());
