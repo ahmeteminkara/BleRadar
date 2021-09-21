@@ -97,6 +97,7 @@ class _ScannerViewState extends State<ScannerView> {
     bleRadar.onServicesDiscovered.listen((List<String> list) {
       addLog("bleRadar.onServicesDiscovered list length: ${list.length}");
       servicesUUID.addAll(list);
+
       writeUserId();
     });
 
@@ -160,8 +161,14 @@ class _ScannerViewState extends State<ScannerView> {
   writeUserId() {
     final serviceUUID = "A6C33970-6C90-49F8-BF3B-47D149400B9C";
     final characteristicUUID = "0C5CE913-5432-440D-8ACD-4E301006682D";
-    bleRadar.writeCharacteristic(serviceUUID, characteristicUUID, "042C806A486280");
-    addLog("bleRadar.writeCharacteristic");
+
+    if (servicesUUID.contains(serviceUUID) || servicesUUID.contains(serviceUUID.toLowerCase())) {
+      addLog("bleRadar.writeCharacteristic service found");
+      bleRadar.writeCharacteristic(serviceUUID, characteristicUUID, "042C806A486280");
+    } else {
+      addLog("bleRadar.writeCharacteristic service not found !!!");
+      bleRadar.disconnectDevice();
+    }
   }
 
   addLog(String s) {

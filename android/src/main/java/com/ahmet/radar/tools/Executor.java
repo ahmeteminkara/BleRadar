@@ -87,6 +87,10 @@ public class Executor {
 
     public BluetoothGatt bluetoothGatt;
 
+    public BluetoothManager bluetoothManager;
+
+    public BluetoothAdapter bluetoothAdapter;
+
     private BluetoothLeScanner bluetoothLeScanner;
 
     boolean flutterHardStop = false;
@@ -114,8 +118,8 @@ public class Executor {
             this.bleServiceCallback = bleServiceCallback;
             this.bleScannerErrorCallback = errorCallback;
 
-            BluetoothManager bluetoothManager = (BluetoothManager) activity.getSystemService(Context.BLUETOOTH_SERVICE);
-            BluetoothAdapter bluetoothAdapter = bluetoothManager.getAdapter();
+            bluetoothManager = (BluetoothManager) activity.getSystemService(Context.BLUETOOTH_SERVICE);
+            bluetoothAdapter = bluetoothManager.getAdapter();
             bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
 
         } catch (Exception e) {
@@ -203,6 +207,7 @@ public class Executor {
          */
         bluetoothLeScanner.stopScan(scanCallback);
         bleScannerCallback.onScanning(false);
+
         timer.cancel();
     }
 
@@ -235,9 +240,10 @@ public class Executor {
     }
 
     public void disconnect() {
-        //bluetoothGatt.disconnect();
+        bluetoothGatt.disconnect();
         bluetoothGatt.close();
         bluetoothGatt = null;
+
         connectedBluetoothDevice = null;
         bleScannerCallback.onConnectDevice(false, null);
     }
@@ -263,8 +269,6 @@ public class Executor {
             if (result.getRssi() < 0 && result.getRssi() > maxRssi) {
                 Log.d(BleScanner.TAG, "cihaz bulundu -: " + result.getDevice().getName() + ", " + result.getRssi());
 
-                BluetoothManager bluetoothManager = (BluetoothManager) activity.getSystemService(Context.BLUETOOTH_SERVICE);
-                BluetoothAdapter bluetoothAdapter = bluetoothManager.getAdapter();
                 connectedBluetoothDevice = bluetoothAdapter.getRemoteDevice(result.getDevice().getAddress());
 
                 //connectedBluetoothDevice = result.getDevice();
@@ -335,18 +339,17 @@ public class Executor {
         @Override
         public void onConnectionStateChange(final BluetoothGatt gatt, int status,
                                             int newState) {
-
+            bluetoothGatt = gatt;
 
             switch (newState) {
                 case BluetoothProfile.STATE_CONNECTED:
                     Log.e(BleScanner.TAG, "newState: " + newState + " STATE_CONNECTED 🔗");
-                    bluetoothGatt = gatt;
                     bleScannerCallback.onConnectDevice(true, connectedBluetoothDevice);
                     gatt.discoverServices();
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
                     Log.e(BleScanner.TAG, "newState: " + newState + " STATE_DISCONNECTED ✂️");
-                    //gatt.close();
+                    disconnect();
                     new Handler(activity.getMainLooper()).postDelayed(() -> bleScannerCallback.onConnectDevice(false, null), 200);
                     break;
                 case BluetoothProfile.STATE_CONNECTING:
@@ -369,13 +372,13 @@ public class Executor {
 
         @Override
         public void onServicesDiscovered(final BluetoothGatt gatt, int status) {
-
+            bluetoothGatt = gatt;
             Log.d(BleScanner.TAG, "servisler keşfedildi");
             if (status == GATT_SUCCESS) {
                 bleServiceCallback.onDetectServices(true, gatt);
             } else {
                 bleServiceCallback.onDetectServices(false, null);
-                disconnect();
+
             }
 
 
@@ -385,7 +388,7 @@ public class Executor {
         public void onCharacteristicWrite(BluetoothGatt gatt,
                                           BluetoothGattCharacteristic characteristic,
                                           int status) {
-
+            bluetoothGatt = gatt;
 
             switch (status) {
                 case GATT_SUCCESS:
@@ -438,7 +441,7 @@ public class Executor {
         public void onCharacteristicRead(BluetoothGatt gatt,
                                          BluetoothGattCharacteristic characteristic,
                                          int status) {
-
+            bluetoothGatt = gatt;
             if (status == GATT_SUCCESS) {
                 bleServiceCallback.onCharacteristicRead(
                         true,
