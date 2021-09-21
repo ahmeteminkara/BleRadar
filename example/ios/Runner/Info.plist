@@ -37,10 +37,12 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 
+
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string></string>
-	<key>Privacy – Bluetooth Peripheral Usage Description</key>
-	<string></string>
+	<string>Çevrenizdeki cihazları görmek için Bluetooth kullanacaktır</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>Çevrenizdeki geçiş aygıtlarını yetkiniz dahilinde kullanmak istiyor</string>
+
 
 	<key>NSCameraUsageDescription</key>
 	<string>Barkodları taramak için kameranıza erişebilir miyiz?</string>
