@@ -37,14 +37,14 @@ class BleRadar:NSObject, CBCentralManagerDelegate,CBPeripheralDelegate {
         self.delegate = delegate as? BleRadarDelegate
         self.errorDelegate = delegate as? BleRadarErrorDelegate
         
-        centralManager = CBCentralManager(delegate: self, queue:nil)
+        self.centralManager = CBCentralManager(delegate: self, queue:nil)
     }
     
     func startTimer () {
       guard timerScanner == nil else { return }
 
       timerScanner =  Timer.scheduledTimer(
-        timeInterval: TimeInterval(0.5),
+        timeInterval: TimeInterval(0.7),
           target      : self,
           selector    : #selector(BleRadar.restart),
           userInfo    : nil,

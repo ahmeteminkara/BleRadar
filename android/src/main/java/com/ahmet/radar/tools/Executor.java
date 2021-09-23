@@ -95,7 +95,7 @@ public class Executor {
 
     boolean flutterHardStop = false;
 
-    final long restartDelaySecond = 4000;
+    final long restartDelaySecond = 6000;
     final double startStopDiff = restartDelaySecond * 0.7;
 
 
