@@ -150,7 +150,6 @@ public class Executor {
                 try {
 
 
-
                     Log.e(BleScanner.TAG, "----> startScan");
                     bluetoothLeScanner.startScan(scanFilterList, scanSettings, scanCallback);
                     bleScannerCallback.onScanning(true);
@@ -229,9 +228,11 @@ public class Executor {
     }
 
     public void disconnect() {
-        bluetoothGatt.disconnect();
-        bluetoothGatt.close();
-        bluetoothGatt = null;
+        if (bluetoothGatt != null) {
+            bluetoothGatt.disconnect();
+            bluetoothGatt.close();
+            bluetoothGatt = null;
+        }
 
         bluetoothDevice = null;
         bleScannerCallback.onConnectDevice(false, null);
@@ -299,15 +300,14 @@ public class Executor {
     };
 
 
-
     private final BluetoothGattCallback bluetoothGattCallback = new BluetoothGattCallback() {
 
 
         @Override
         public void onConnectionStateChange(final BluetoothGatt gatt, int status,
                                             int newState) {
-            
 
+            bluetoothGatt = gatt;
             switch (newState) {
                 case BluetoothProfile.STATE_CONNECTED:
                     Log.e(BleScanner.TAG, "newState: " + newState + " STATE_CONNECTED 🔗");
@@ -333,13 +333,8 @@ public class Executor {
 
 
         @Override
-        public void onCharacteristicChanged(BluetoothGatt gatt,
-                                            BluetoothGattCharacteristic characteristic) {
-        }
-
-        @Override
         public void onServicesDiscovered(final BluetoothGatt gatt, int status) {
-            
+            bluetoothGatt = gatt;
             Log.d(BleScanner.TAG, "servisler keşfedildi");
             if (status == GATT_SUCCESS) {
                 bleServiceCallback.onDetectServices(true, gatt);
@@ -355,7 +350,7 @@ public class Executor {
         public void onCharacteristicWrite(BluetoothGatt gatt,
                                           BluetoothGattCharacteristic characteristic,
                                           int status) {
-            
+            bluetoothGatt = gatt;
 
             switch (status) {
                 case GATT_SUCCESS:
@@ -408,7 +403,7 @@ public class Executor {
         public void onCharacteristicRead(BluetoothGatt gatt,
                                          BluetoothGattCharacteristic characteristic,
                                          int status) {
-            
+            bluetoothGatt = gatt;
             if (status == GATT_SUCCESS) {
                 bleServiceCallback.onCharacteristicRead(
                         true,
