@@ -41,15 +41,13 @@ public class BleScanner extends Executor {
      * @param errorCallback   Hataları yakalamak için
      */
     public BleScanner(Activity activity,
-                      UUID[] uuids,
                       List<ScanFilter> scanFilters,
                       ScanSettings scanSettings,
                       BleScannerCallback scannerCallback,
                       BleServiceCallback bleServiceCallback,
                       BleScannerErrorCallback errorCallback) {
 
-
-        super(activity, uuids, scanFilters, scanSettings, scannerCallback, bleServiceCallback, errorCallback);
+        super(activity,scanFilters, scanSettings, scannerCallback, bleServiceCallback, errorCallback);
 
         this.activity = activity;
         this.errorCallback = errorCallback;
@@ -57,13 +55,12 @@ public class BleScanner extends Executor {
 
     }
 
-    public void startScan(int maxRssi, boolean vibration, boolean autoConnect) {
+    public void startScan(int maxRssi, boolean vibration,boolean autoConnect) {
         if (!DeviceControls.checkSetting(this.activity, this.errorCallback)) return;
-        super.start(maxRssi, vibration, autoConnect);
+        super.start(maxRssi, vibration,autoConnect);
     }
 
     public BluetoothGattService getService(String uuid) {
-        Log.d(BleScanner.TAG, "getService() UUID: " + uuid);
         try {
             return super.bluetoothGatt.getService(UUID.fromString(uuid));
         } catch (Exception e) {
@@ -77,12 +74,10 @@ public class BleScanner extends Executor {
         try {
             for (BluetoothGattService service : this.bluetoothGatt.getServices()) {
                 list.add(service.getUuid().toString());
-                Log.e(BleScanner.TAG, "this.getServices() item : " + service.getUuid().toString());
             }
-
             return list;
         } catch (Exception e) {
-            Log.e(BleScanner.TAG, "getServicesList() error: " + e.toString());
+            Log.e(BleScanner.TAG, "getServicesList() is empty");
             return list;
         }
     }

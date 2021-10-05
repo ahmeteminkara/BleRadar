@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:ble_radar/ble_radar.dart';
 import 'package:ble_radar/bluetooth_device.dart';
+import 'package:ble_radar_example/view/buttons.dart';
 import 'package:ble_radar_example/view/qr_scanner.dart';
 
 import 'package:flutter/material.dart';
@@ -18,12 +19,12 @@ class _ScannerViewState extends State<ScannerView> {
   BleRadar bleRadar;
   BluetoothDevice bluetoothDevice;
   List<String> servicesUUID = [];
-  bool isEnableBluetooth = false, isEnableLocation = false, isScanning = false, isConnectedDevice = false, isShowLog = false;
+  bool isEnableBluetooth = false, isEnableLocation = false, isScanning = false, isConnectedDevice = false, isShowLog = true;
 
   List<String> log = [];
   ScrollController logController;
 
-  bool get isAutoConnect => true;
+  bool get isAutoConnect => false;
 
   @override
   void initState() {
@@ -36,11 +37,11 @@ class _ScannerViewState extends State<ScannerView> {
   startMethod() {
     setState(() => log.clear());
     bleRadar.start(
-      maxRssi: Platform.isAndroid ? -50 : -45,
+      maxRssi: -55,
+      vibration: true,
       autoConnect: isAutoConnect,
       filterUUID: ["99999999-8888-7777-6666-555555555555"],
     );
-    addLog("bleRadar.start");
   }
 
   void initBle() {
@@ -66,14 +67,15 @@ class _ScannerViewState extends State<ScannerView> {
 
     bleRadar.isScanning.listen((status) {
       if (status == null) return;
-      addLog("bleRadar.isScanning $status");
-      setState(() {
-        isScanning = status;
-      });
+      if (status) setState(() => log.clear());
+
+      addLog(status ? " 📡 Tarama başladı" : "  ❌ Tarama sonlandı ");
+      setState(() => isScanning = status);
     });
 
     bleRadar.onDetectDevice.listen((BluetoothDevice device) {
-      addLog("BluetoothDevice : ${device.toString()}");
+      addLog("    📲 Bulduğu cihaz: ${device.toString()} ");
+
       setState(() {
         bluetoothDevice = device;
       });
@@ -85,7 +87,7 @@ class _ScannerViewState extends State<ScannerView> {
     });
 
     bleRadar.isConnectedDevice.listen((status) {
-      addLog("bleRadar.isConnectedDevice $status");
+      addLog(status ? "     🟢 cihaza bağlandı" : "     🔴 bağlantı koptu ");
       setState(() {
         isConnectedDevice = status;
         if (!status && bluetoothDevice != null) {
@@ -95,7 +97,11 @@ class _ScannerViewState extends State<ScannerView> {
     });
 
     bleRadar.onServicesDiscovered.listen((List<String> list) {
-      addLog("bleRadar.onServicesDiscovered list length: ${list.length}");
+      if (list.isEmpty) {
+        addLog("        ⛔ servis tespit edilemedi !!");
+      } else {
+        addLog("        🔍 ${list.length} adet servis tespit edildi");
+      }
       servicesUUID.addAll(list);
 
       writeUserId();
@@ -125,7 +131,7 @@ class _ScannerViewState extends State<ScannerView> {
     });
 
     bleRadar.onWriteCharacteristic.listen((status) {
-      addLog("bleRadar.onWriteCharacteristic");
+      addLog("✍ Yazma işi bitti");
       bleRadar.disconnectDevice();
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -163,10 +169,10 @@ class _ScannerViewState extends State<ScannerView> {
     final characteristicUUID = "0C5CE913-5432-440D-8ACD-4E301006682D";
 
     if (servicesUUID.contains(serviceUUID) || servicesUUID.contains(serviceUUID.toLowerCase())) {
-      addLog("bleRadar.writeCharacteristic service found");
+      addLog("          🚀 yazma istedi gitti");
       bleRadar.writeCharacteristic(serviceUUID, characteristicUUID, "042C806A486280");
     } else {
-      addLog("bleRadar.writeCharacteristic service not found !!!");
+      addLog("🚧 yazma servisi bulunamadı");
       bleRadar.disconnectDevice();
     }
   }
@@ -192,18 +198,20 @@ class _ScannerViewState extends State<ScannerView> {
           backgroundColor: Colors.red,
           title: Text('Ble Radar'),
           actions: [
-            TextButton.icon(
-                style: ButtonStyle(foregroundColor: MaterialStateProperty.all(Colors.white)),
-                onPressed: () => setState(() {
-                      isShowLog = !isShowLog;
-                    }),
-                icon: Icon(Icons.subject),
-                label: Text("Log " + (isShowLog ? "Gizle" : "Göster"))),
-            TextButton.icon(
-                style: ButtonStyle(foregroundColor: MaterialStateProperty.all(Colors.white)),
-                onPressed: () => startScanQR(),
-                icon: Icon(Icons.qr_code_scanner_rounded),
-                label: Text("QR Tara"))
+            IconButton(
+              icon: Icon(Icons.network_check_outlined),
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => Buttons()));
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.subject),
+              onPressed: () => setState(() => isShowLog = !isShowLog),
+            ),
+            IconButton(
+              icon: Icon(Icons.qr_code_scanner_rounded),
+              onPressed: () => startScanQR(),
+            )
           ],
         ),
         body: Container(
@@ -248,7 +256,10 @@ class _ScannerViewState extends State<ScannerView> {
       return ListView.separated(
         padding: EdgeInsets.only(bottom: 40),
         controller: logController,
-        itemBuilder: (c, i) => Text(log.elementAt(i)),
+        itemBuilder: (c, i) => Padding(
+          padding: const EdgeInsets.all(5),
+          child: Text(log.elementAt(i), style: TextStyle(fontSize: 18)),
+        ),
         separatorBuilder: (c, i) => Divider(height: 1),
         itemCount: log.length,
       );

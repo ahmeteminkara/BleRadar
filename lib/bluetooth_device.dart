@@ -11,6 +11,6 @@ class BluetoothDevice {
 
   @override
   String toString() {
-    return "NAME: $name, RSSI: $rssi";
+    return "$name 📶 $rssi";
   }
 }

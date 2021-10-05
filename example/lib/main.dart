@@ -1,3 +1,4 @@
+import 'package:ble_radar_example/view/buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -14,7 +15,7 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       title: "BleRadar",
-      home: ScannerView(),
+      home: Buttons(),
     );
   }
 }

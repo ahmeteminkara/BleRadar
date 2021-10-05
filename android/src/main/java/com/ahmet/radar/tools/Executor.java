@@ -16,6 +16,7 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
@@ -52,7 +53,6 @@ public class Executor {
     /**
      * Tarama filtresinin listesi
      */
-    private UUID[] uuidList;
     private List<ScanFilter> scanFilterList;
 
     private ScanSettings scanSettings;
@@ -83,7 +83,7 @@ public class Executor {
     /**
      * Bağlanılan cihaz
      */
-    private BluetoothDevice connectedBluetoothDevice;
+    private BluetoothDevice bluetoothDevice;
 
     public BluetoothGatt bluetoothGatt;
 
@@ -95,7 +95,7 @@ public class Executor {
 
     boolean flutterHardStop = false;
 
-    final long restartDelaySecond = 6000;
+    final long restartDelaySecond = 4000;
     final double startStopDiff = restartDelaySecond * 0.7;
 
 
@@ -103,7 +103,6 @@ public class Executor {
 
     public Executor(
             Activity activity,
-            UUID[] uuidList,
             List<ScanFilter> scanFilters,
             ScanSettings scanSettings,
             BleScannerCallback callback,
@@ -111,7 +110,6 @@ public class Executor {
             BleScannerErrorCallback errorCallback) {
         try {
             this.activity = activity;
-            this.uuidList = uuidList;
             this.scanFilterList = scanFilters;
             this.scanSettings = scanSettings;
             this.bleScannerCallback = callback;
@@ -128,6 +126,7 @@ public class Executor {
 
 
     }
+
 
     /**
      * @param maxRssi     Bulunacak cihazın uzaklık limiti
@@ -151,15 +150,6 @@ public class Executor {
                 try {
 
 
-                    /*
-                     if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
-                     Log.e(BleScanner.TAG, "----> startScan");
-                     bluetoothLeScanner.startScan(scanFilterList, scanSettings, scanCallback);
-                     } else {
-                     Log.e(BleScanner.TAG, "-> start Le Scan");
-                     bluetoothAdapter.startLeScan(uuidList.length > 0 ? uuidList : null, scanCallbackEski);
-                     }
-                     */
 
                     Log.e(BleScanner.TAG, "----> startScan");
                     bluetoothLeScanner.startScan(scanFilterList, scanSettings, scanCallback);
@@ -176,6 +166,8 @@ public class Executor {
 
                     Log.e(BleScanner.TAG, "----> STOP Scanner");
                     bluetoothLeScanner.stopScan(scanCallback);
+                    bluetoothAdapter.cancelDiscovery();
+
                     /*
                      if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
                      bluetoothLeScanner.stopScan(scanCallback);
@@ -207,7 +199,7 @@ public class Executor {
          */
         bluetoothLeScanner.stopScan(scanCallback);
         bleScannerCallback.onScanning(false);
-
+        bluetoothAdapter.cancelDiscovery();
         timer.cancel();
     }
 
@@ -215,21 +207,18 @@ public class Executor {
 
 
         try {
-            /*
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 Log.e(BleScanner.TAG, "connectGatt TRANSPORT_LE");
-                bluetoothGatt = connectedBluetoothDevice.connectGatt(activity, false, bluetoothGattCallback, BluetoothDevice.TRANSPORT_LE);
+                bluetoothGatt = bluetoothDevice.connectGatt(activity, false, bluetoothGattCallback, BluetoothDevice.TRANSPORT_LE);
             } else {
                 Log.e(BleScanner.TAG, "connectGatt");
-                bluetoothGatt = connectedBluetoothDevice.connectGatt(activity, false, bluetoothGattCallback);
+                bluetoothGatt = bluetoothDevice.connectGatt(activity, false, bluetoothGattCallback);
             }
 
-             */
-            bluetoothGatt = connectedBluetoothDevice.connectGatt(activity, false, bluetoothGattCallback);
             if (bluetoothGatt == null) {
                 Log.e(BleScanner.TAG, "bluetoothGatt is null");
                 bleScannerErrorCallback.onScanError(BleScanErrors.NOT_CONNECTED_DEVICE);
-                disconnect();
             }
 
         } catch (Exception e) {
@@ -244,7 +233,7 @@ public class Executor {
         bluetoothGatt.close();
         bluetoothGatt = null;
 
-        connectedBluetoothDevice = null;
+        bluetoothDevice = null;
         bleScannerCallback.onConnectDevice(false, null);
     }
 
@@ -255,9 +244,9 @@ public class Executor {
 
         Vibrator v = (Vibrator) activity.getSystemService(Context.VIBRATOR_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            v.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE));
+            v.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
         } else {
-            v.vibrate(30);
+            v.vibrate(100);
         }
     }
 
@@ -269,12 +258,12 @@ public class Executor {
             if (result.getRssi() < 0 && result.getRssi() > maxRssi) {
                 Log.d(BleScanner.TAG, "cihaz bulundu -: " + result.getDevice().getName() + ", " + result.getRssi());
 
-                connectedBluetoothDevice = bluetoothAdapter.getRemoteDevice(result.getDevice().getAddress());
+                bluetoothDevice = bluetoothAdapter.getRemoteDevice(result.getDevice().getAddress());
 
                 //connectedBluetoothDevice = result.getDevice();
 
                 if (vibration) startVibration();
-                boolean autoConnect = bleScannerCallback.onDetectDevice(connectedBluetoothDevice, result.getRssi());
+                boolean autoConnect = bleScannerCallback.onDetectDevice(bluetoothDevice, result.getRssi());
                 if (autoConnect) {
                     stop();
                     connectDevice();
@@ -309,28 +298,6 @@ public class Executor {
         }
     };
 
-    private final BluetoothAdapter.LeScanCallback scanCallbackEski = new BluetoothAdapter.LeScanCallback() {
-
-
-        @Override
-        public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-            if (rssi < 0 && rssi > maxRssi) {
-                Log.d(BleScanner.TAG, "cihaz bulundu: " + device.getName() + ", " + rssi);
-
-                connectedBluetoothDevice = device;
-
-
-                if (vibration) startVibration();
-                boolean autoConnect = bleScannerCallback.onDetectDevice(connectedBluetoothDevice, rssi);
-                if (autoConnect) {
-                    stop();
-                    connectDevice();
-                }
-            }
-
-
-        }
-    };
 
 
     private final BluetoothGattCallback bluetoothGattCallback = new BluetoothGattCallback() {
@@ -339,13 +306,13 @@ public class Executor {
         @Override
         public void onConnectionStateChange(final BluetoothGatt gatt, int status,
                                             int newState) {
-            bluetoothGatt = gatt;
+            
 
             switch (newState) {
                 case BluetoothProfile.STATE_CONNECTED:
                     Log.e(BleScanner.TAG, "newState: " + newState + " STATE_CONNECTED 🔗");
-                    bleScannerCallback.onConnectDevice(true, connectedBluetoothDevice);
-                    gatt.discoverServices();
+                    bleScannerCallback.onConnectDevice(true, bluetoothDevice);
+                    bluetoothGatt.discoverServices();
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
                     Log.e(BleScanner.TAG, "newState: " + newState + " STATE_DISCONNECTED ✂️");
@@ -372,7 +339,7 @@ public class Executor {
 
         @Override
         public void onServicesDiscovered(final BluetoothGatt gatt, int status) {
-            bluetoothGatt = gatt;
+            
             Log.d(BleScanner.TAG, "servisler keşfedildi");
             if (status == GATT_SUCCESS) {
                 bleServiceCallback.onDetectServices(true, gatt);
@@ -388,7 +355,7 @@ public class Executor {
         public void onCharacteristicWrite(BluetoothGatt gatt,
                                           BluetoothGattCharacteristic characteristic,
                                           int status) {
-            bluetoothGatt = gatt;
+            
 
             switch (status) {
                 case GATT_SUCCESS:
@@ -441,7 +408,7 @@ public class Executor {
         public void onCharacteristicRead(BluetoothGatt gatt,
                                          BluetoothGattCharacteristic characteristic,
                                          int status) {
-            bluetoothGatt = gatt;
+            
             if (status == GATT_SUCCESS) {
                 bleServiceCallback.onCharacteristicRead(
                         true,
