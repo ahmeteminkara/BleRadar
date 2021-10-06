@@ -28,8 +28,6 @@ class BleRadar:NSObject, CBCentralManagerDelegate,CBPeripheralDelegate {
     
     var myService: CBService!
     
-    var gattServiceCharacteristic = [CBUUID:[CBCharacteristic]]()
-    
     
     init(_ delegate: Any) {
         super.init()
@@ -38,6 +36,16 @@ class BleRadar:NSObject, CBCentralManagerDelegate,CBPeripheralDelegate {
         self.errorDelegate = delegate as? BleRadarErrorDelegate
         
         self.centralManager = CBCentralManager(delegate: self, queue:nil)
+        switch self.centralManager.state {
+        case .poweredOn:
+            (delegate as! BleRadarDelegate).isOpenBluetooth(status: true)
+            break
+        case .poweredOff:
+            (delegate as! BleRadarDelegate).isOpenBluetooth(status: false)
+            break
+        default: break
+            
+        }
     }
     
     func startTimer () {
@@ -58,7 +66,6 @@ class BleRadar:NSObject, CBCentralManagerDelegate,CBPeripheralDelegate {
     
     @objc private func restart(){
         self.stopScan()
-        self.gattServiceCharacteristic.removeAll()
         self.startScan(filter: self.filter, maxRssi: self.maxRssi, vibrate: self.vibration)
     }
     
@@ -119,9 +126,11 @@ class BleRadar:NSObject, CBCentralManagerDelegate,CBPeripheralDelegate {
     }
     
     func disconnectDevice() {
-        
+        print("disconnectDevice()")
         if(self.myPeripheral != nil){
             centralManager.cancelPeripheralConnection(self.myPeripheral)
+        }else{
+            print("disconnectDevice device is nil")
         }
     }
     

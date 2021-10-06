@@ -33,6 +33,9 @@
         public override init() {
             super.init()
             
+            if bleRadar == nil {
+                bleRadar = BleRadar(self)
+            }
             
             eventSinkBluetoothStatus = BleEventSink()
             eventSinkScanningStatus = BleEventSink()
@@ -49,20 +52,18 @@
         
         
         @objc private func applicationDidBecomeActive(notification: NSNotification) {
-            self.startMethod()
+            //self.startMethod()
             print("BleRadar -> ACTIVE")
         }
         
         
         @objc private func applicationDidEnterBackground(notification: NSNotification) {
-            self.bleRadar?.stopScan()
+            //self.bleRadar?.stopScan()
             print("BleRadar -> BACKGROUND")
         }
         
         func startMethod(){
-            if bleRadar == nil {
-                bleRadar = BleRadar(self)
-            }
+           
             
             self.bleRadar!.startScan(
                 filter: self.filterUUID,

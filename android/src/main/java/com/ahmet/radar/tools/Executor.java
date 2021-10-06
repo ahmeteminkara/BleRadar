@@ -17,6 +17,7 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.ParcelUuid;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
@@ -196,10 +197,10 @@ public class Executor {
          bluetoothAdapter.stopLeScan(scanCallbackEski);
          }
          */
-        bluetoothLeScanner.stopScan(scanCallback);
+        timer.cancel();
         bleScannerCallback.onScanning(false);
         bluetoothAdapter.cancelDiscovery();
-        timer.cancel();
+        bluetoothLeScanner.stopScan(scanCallback);
     }
 
     public void connectDevice() {
@@ -260,6 +261,14 @@ public class Executor {
                 Log.d(BleScanner.TAG, "cihaz bulundu -: " + result.getDevice().getName() + ", " + result.getRssi());
 
                 bluetoothDevice = bluetoothAdapter.getRemoteDevice(result.getDevice().getAddress());
+                try {
+                    for (ParcelUuid uuid : bluetoothDevice.getUuids()) {
+                        Log.d(BleScanner.TAG, "cihaz uuids: " + uuid.toString());
+                    }
+                } catch (Exception e) {
+                    Log.d(BleScanner.TAG, "cihaz uuids error: " + e.toString());
+
+                }
 
                 //connectedBluetoothDevice = result.getDevice();
 

@@ -24,8 +24,8 @@ class _ButtonsState extends State<Buttons> {
 
   @override
   void initState() {
-    initBle();
     super.initState();
+    initBle();
   }
 
   @override
@@ -153,6 +153,10 @@ class _ButtonsState extends State<Buttons> {
 
     if (servicesUUID.value == null) {
       return;
+    }
+
+    for (var item in servicesUUID.value) {
+      print("service uuid item: $item");
     }
 
     if (servicesUUID.value.contains(serviceUUID) || servicesUUID.value.contains(serviceUUID.toLowerCase())) {
