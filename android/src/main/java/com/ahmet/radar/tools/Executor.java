@@ -231,8 +231,6 @@ public class Executor {
     public void disconnect() {
         if (bluetoothGatt != null) {
             bluetoothGatt.disconnect();
-            bluetoothGatt.close();
-            bluetoothGatt = null;
         }
 
         bluetoothDevice = null;
@@ -260,17 +258,8 @@ public class Executor {
             if (result.getRssi() < 0 && result.getRssi() > maxRssi) {
                 Log.d(BleScanner.TAG, "cihaz bulundu -: " + result.getDevice().getName() + ", " + result.getRssi());
 
-                bluetoothDevice = bluetoothAdapter.getRemoteDevice(result.getDevice().getAddress());
-                try {
-                    for (ParcelUuid uuid : bluetoothDevice.getUuids()) {
-                        Log.d(BleScanner.TAG, "cihaz uuids: " + uuid.toString());
-                    }
-                } catch (Exception e) {
-                    Log.d(BleScanner.TAG, "cihaz uuids error: " + e.toString());
-
-                }
-
-                //connectedBluetoothDevice = result.getDevice();
+                //bluetoothDevice = bluetoothAdapter.getRemoteDevice(result.getDevice().getAddress());
+                bluetoothDevice = result.getDevice();
 
                 if (vibration) startVibration();
                 boolean autoConnect = bleScannerCallback.onDetectDevice(bluetoothDevice, result.getRssi());
@@ -325,7 +314,7 @@ public class Executor {
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
                     Log.e(BleScanner.TAG, "newState: " + newState + " STATE_DISCONNECTED ✂️");
-                    disconnect();
+                    bluetoothGatt.close();
                     new Handler(activity.getMainLooper()).postDelayed(() -> bleScannerCallback.onConnectDevice(false, null), 200);
                     break;
                 case BluetoothProfile.STATE_CONNECTING:
