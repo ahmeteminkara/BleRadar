@@ -1,6 +1,7 @@
 package com.ahmet.radar.listener;
 
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
 
 /**
  * Hizmet, servisin içindeki "characteristic"
@@ -24,5 +25,11 @@ public abstract class BleScannerCallback {
      * @param device      bağlı cihaz bilgileri
      */
     public abstract void onConnectDevice(boolean isConnected, BluetoothDevice device);
+
+    /**
+     * @param isConnected cihaz ile bağlı olma durumu
+     * @param gatt      bağlı olan gatt ı verir
+     */
+    public abstract void onConnectGatt(boolean isConnected, BluetoothGatt gatt);
 
 }

@@ -242,7 +242,7 @@ class _ScannerViewState extends State<ScannerView> {
           children: [
             _scannerStart,
             _scannerStop,
-            //_scannerStatus,
+            _scannerStatus,
             _bluetoothStatus,
             _locationStatus,
           ],
