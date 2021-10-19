@@ -17,12 +17,12 @@ import com.ahmet.ble_module.enums.BleRadarDeviceError;
 import com.ahmet.ble_module.listener.BleRadarErrorListener;
 import com.ahmet.radar.BleScanner;
 
+@SuppressLint("StaticFieldLeak")
 public class BleUtils {
 
     public static int bluetoothRequestCode = 1;
     public static int fineLocationRequestCode = 2;
-    public static int courseLocationRequestCode = 3;
-    public static int bgLocationRequestCode = 4;
+    public static int bgLocationRequestCode = 3;
 
 
     public static BluetoothAdapter getAdapter(Activity activity) {
@@ -32,11 +32,9 @@ public class BleUtils {
         return bluetoothManager.getAdapter();
     }
 
-    @SuppressLint("StaticFieldLeak")
+
     /**
      * cihazda bluetooth u kontrol eder
-     *
-     * @param activity
      */
     public static boolean isOpenBluetooth(Activity activity) {
 

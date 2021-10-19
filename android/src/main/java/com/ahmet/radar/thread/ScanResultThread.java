@@ -36,6 +36,7 @@ public class ScanResultThread extends Thread {
     public void run() {
         super.run();
 
+
         if (deviceRssi < 0 && deviceRssi > maxRssi) {
             Log.d(BleScanner.TAG, "cihaz bulundu -: " + device.getName() + ", " + deviceRssi);
             callback.onDetectDevice(device, deviceRssi);

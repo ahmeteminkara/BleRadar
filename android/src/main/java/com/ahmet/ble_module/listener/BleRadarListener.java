@@ -9,9 +9,6 @@ import java.util.List;
 
 public interface BleRadarListener {
 
-    void onRadarChangedScannerStatus(boolean status);
-
-    void onRadarDetectedDevice(BluetoothDevice device,int rssi);
 
     void onRadarDiscoveryService(String jsonStr);
 

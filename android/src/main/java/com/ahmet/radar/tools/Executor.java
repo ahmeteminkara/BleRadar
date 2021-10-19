@@ -98,7 +98,6 @@ public class Executor {
     private BluetoothLeScanner bluetoothLeScanner;
 
 
-
     boolean flutterHardStop = false;
 
     final long restartDelaySecond = 4000;
@@ -163,8 +162,13 @@ public class Executor {
 
 
                     Log.e(BleScanner.TAG, "----> startScan");
+                    Log.e(BleScanner.TAG, "filterUUID.length " + filterUUID.length);
                     //bluetoothLeScanner.startScan(scanFilterList, scanSettings, scanCallback);
-                    bluetoothAdapter.startLeScan(filterUUID,scanCallbackEski);
+                    if (filterUUID.length > 0) {
+                        bluetoothAdapter.startLeScan(filterUUID, scanCallbackEski);
+                    } else {
+                        bluetoothAdapter.startLeScan(scanCallbackEski);
+                    }
                     bleScannerCallback.onScanning(true);
 
                 } catch (Exception e) {
@@ -245,6 +249,7 @@ public class Executor {
     private final BluetoothAdapter.LeScanCallback scanCallbackEski = new BluetoothAdapter.LeScanCallback() {
         @Override
         public void onLeScan(BluetoothDevice bluetoothDevice, int rssi, byte[] bytes) {
+            Log.d(BleScanner.TAG, "cihaz : " + bluetoothDevice.getName() + ", " + rssi);
             new ScanResultThread(bluetoothDevice, rssi, maxRssi, bleScannerCallback).start();
         }
     };

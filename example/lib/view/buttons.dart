@@ -60,9 +60,11 @@ class _ButtonsState extends State<Buttons> {
     bleRadar.onDetectDevice.listen((BluetoothDevice device) {
       if (device == null) return;
       _bluetoothDevice.value = device;
-      if (device.rssi < 0 && device.rssi > -50) {
+      //if (device.rssi < 0 && device.rssi > -50) {
+      if (device.name.contains("XP_")) {
         bleRadar.stop();
-        bleRadar.connectDevice();
+        print("device: ${device.toString()}");
+        //bleRadar.connectDevice();
       }
     });
 
@@ -143,7 +145,12 @@ class _ButtonsState extends State<Buttons> {
       });
 
   void start() {
-    bleRadar.start(maxRssi: -100, vibration: true, autoConnect: false, filterUUID: [uuidBleDvce]);
+    bleRadar.start(
+      maxRssi: -45,
+      vibration: true,
+      autoConnect: false,
+    //  filterUUID: [uuidBleDvce],
+    );
   }
 
   get _buttonStop => IconButton(
