@@ -56,14 +56,6 @@ class _ScannerViewState extends State<ScannerView> {
       });
     });
 
-    if (Platform.isAndroid) {
-      bleRadar.isEnableLocation.listen((status) {
-        if (status == null) return;
-        setState(() {
-          isEnableLocation = status;
-        });
-      });
-    }
 
     bleRadar.isScanning.listen((status) {
       if (status == null) return;

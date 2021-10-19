@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.le.BluetoothLeScanner;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -30,6 +31,10 @@ public class BleUtils {
         BluetoothManager bluetoothManager = (BluetoothManager)
                 activity.getApplicationContext().getSystemService(Context.BLUETOOTH_SERVICE);
         return bluetoothManager.getAdapter();
+    }
+
+    public static BluetoothLeScanner getLeScanner(Activity activity) {
+        return getAdapter(activity).getBluetoothLeScanner();
     }
 
 

@@ -25,7 +25,6 @@ class _ButtonsState extends State<Buttons> {
   ValueNotifier<bool> _isConnectedDevice = ValueNotifier(null);
   ValueNotifier<bool> _isScanning = ValueNotifier(null);
   ValueNotifier<bool> _isEnableBluetooth = ValueNotifier(null);
-  ValueNotifier<bool> _isEnableLocation = ValueNotifier(null);
 
   @override
   void initState() {
@@ -45,12 +44,6 @@ class _ButtonsState extends State<Buttons> {
       if (status == null) return;
       _isEnableBluetooth.value = status;
     });
-    if (Platform.isAndroid) {
-      bleRadar.isEnableLocation.listen((status) {
-        if (status == null) return;
-        _isEnableLocation.value = status;
-      });
-    }
 
     bleRadar.isScanning.listen((status) {
       if (status == null) return;
@@ -61,9 +54,10 @@ class _ButtonsState extends State<Buttons> {
       if (device == null) return;
       _bluetoothDevice.value = device;
       //if (device.rssi < 0 && device.rssi > -50) {
-      if (device.name.contains("XP_")) {
+      print("device found: ${device.name}");
+      if (device.name != null && device.name.contains("XP2_")) {
         bleRadar.stop();
-        print("device: ${device.toString()}");
+        print("\n\n!!!!!!!! device: ${device.toString()}");
         //bleRadar.connectDevice();
       }
     });
@@ -149,7 +143,7 @@ class _ButtonsState extends State<Buttons> {
       maxRssi: -45,
       vibration: true,
       autoConnect: false,
-    //  filterUUID: [uuidBleDvce],
+      //  filterUUID: [uuidBleDvce],
     );
   }
 

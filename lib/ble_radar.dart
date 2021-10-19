@@ -24,6 +24,7 @@ class BleRadar {
   }
 
   _loadListeners() async {
+
     if (Platform.isAndroid) {
       _isEnableLocationController.add(await _channel.invokeMethod('isOpenLocation'));
 
