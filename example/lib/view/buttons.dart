@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:ble_radar/ble_radar.dart';
 import 'package:ble_radar/bluetooth_device.dart';
+import 'package:device_info/device_info.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -14,9 +15,9 @@ class Buttons extends StatefulWidget {
 }
 
 class _ButtonsState extends State<Buttons> {
-  final uuidBleDvce = "99999999-8888-7777-6666-555555555555";
-  final uuidService = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
-  final uuidCharcts = "ffffffff-1111-2222-3333-444444444444";
+  final uuidBleDvce = "11111111-1111-1111-1111-111111111111";
+  final uuidService = "22222222-2222-2222-2222-222222222222";
+  final uuidCharcts = "33333333-3333-3333-3333-333333333333";
 
   BleRadar bleRadar;
   ValueNotifier<bool> _writeStatus = ValueNotifier(null);
@@ -26,16 +27,32 @@ class _ButtonsState extends State<Buttons> {
   ValueNotifier<bool> _isScanning = ValueNotifier(null);
   ValueNotifier<bool> _isEnableBluetooth = ValueNotifier(null);
 
+  String deviceName = "";
+
   @override
   void initState() {
     super.initState();
     initBle();
+    getDeviceName();
   }
 
   @override
   void dispose() {
     bleRadar.dispose();
     super.dispose();
+  }
+
+  getDeviceName() async {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    if (Platform.isIOS) {
+      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+      print('Running on ${iosInfo.utsname.machine}'); // e.g. "iPod7,1"
+      deviceName = iosInfo.utsname.machine;
+    } else {
+      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      print('Running on ${androidInfo.model}'); // e.g. "Moto G (4)"
+      deviceName = androidInfo.model;
+    }
   }
 
   void initBle() {
@@ -53,12 +70,12 @@ class _ButtonsState extends State<Buttons> {
     bleRadar.onDetectDevice.listen((BluetoothDevice device) {
       if (device == null) return;
       _bluetoothDevice.value = device;
-      //if (device.rssi < 0 && device.rssi > -50) {
-      print("device found: ${device.name}");
-      if (device.name != null && device.name.contains("XP2_")) {
+
+      //if (device.name != null && device.name.contains("XP2_")) {
+      if (device.rssi < 0 && device.rssi > -50) {
         bleRadar.stop();
-        print("\n\n!!!!!!!! device: ${device.toString()}");
-        //bleRadar.connectDevice();
+        bleRadar.connectDevice();
+        print("!!!!!!! device: ${device.toString()}");
       }
     });
 
@@ -66,7 +83,7 @@ class _ButtonsState extends State<Buttons> {
       if (status == null) return;
       _isConnectedDevice.value = status;
       if (status) {
-        Future.delayed(Duration(seconds: 20), () {
+        Future.delayed(Duration(seconds: 5), () {
           if (_isConnectedDevice.value != null && _isConnectedDevice.value) bleRadar.disconnectDevice();
         });
       } else {
@@ -96,12 +113,12 @@ class _ButtonsState extends State<Buttons> {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Row(children: [
-          status ? Icon(Icons.done, color: Colors.white) : Icon(Icons.error, color: Colors.white),
-          SizedBox(height: 10),
+          status ? Icon(Icons.done, color: Colors.white) : Icon(Icons.error, color: Colors.white, size: 22),
+          SizedBox(height: 20),
           Expanded(
               child: Text(
             status ? "İşlem başarılı" : "Bir hata meydana geldi",
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w500),
           )),
         ]),
         backgroundColor: status ? Colors.green : Colors.red,
@@ -140,10 +157,10 @@ class _ButtonsState extends State<Buttons> {
 
   void start() {
     bleRadar.start(
-      maxRssi: -45,
+      maxRssi: -100,
       vibration: true,
       autoConnect: false,
-      //  filterUUID: [uuidBleDvce],
+      filterUUID: [uuidBleDvce],
     );
   }
 
@@ -167,15 +184,23 @@ class _ButtonsState extends State<Buttons> {
     }
 
     if (_servicesUUID.value.contains(uuidService) || _servicesUUID.value.contains(uuidService.toLowerCase())) {
-      bleRadar.writeCharacteristic(uuidService, uuidCharcts, "042C806A486280");
+      bleRadar.writeCharacteristic(uuidService, uuidCharcts, deviceName);
     } else {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text("Servis bulunamadı"),
-          content: Text("Bağlantıyı koparın"),
-        ),
-      );
+      bleRadar.disconnectDevice();
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Row(children: [
+          Icon(Icons.error, color: Colors.white, size: 22),
+          SizedBox(height: 20),
+          Expanded(
+              child: Text(
+            "Servisi bulamadı",
+            style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w500),
+          )),
+        ]),
+        backgroundColor: Colors.red,
+        duration: Duration(seconds: 2),
+      ));
     }
   }
 

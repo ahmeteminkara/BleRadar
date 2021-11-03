@@ -92,7 +92,7 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
 
     public int maxRssi = 0;
 
-    long startDelay = 4000;
+    long startDelay = 3000;
     long stopTimeout = 500;
 
     Timer timerStart;
@@ -120,7 +120,7 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
                     json.put("name", device.getName());
                     json.put("mac", device.getAddress());
 
-                    bluetoothDevice = device;
+                    if (bluetoothDevice == null) bluetoothDevice = device;
                     activity.runOnUiThread(() -> {
                         if (flutterDetectDevice != null)
                             flutterDetectDevice.success(json.toString());
@@ -165,6 +165,7 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
         if (!flutterControlScanning) return;
 
         if (rssi < 0 && rssi > maxRssi) {
+
             Log.d(TAG, "cihaz bulundu -: " + device.getName() + ", " + rssi);
 
             try {
@@ -172,6 +173,7 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
                 json.put("rssi", rssi);
                 json.put("name", device.getName());
                 json.put("mac", device.getAddress());
+
 
                 bluetoothDevice = device;
                 activity.runOnUiThread(() -> {
@@ -185,6 +187,7 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
     };
 
     public void startTimer() {
+        bluetoothDevice = null;
         stopTimer();
         timerStart = new Timer();
         timerStart.schedule(new TimerTask() {
@@ -221,12 +224,15 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
 
                 Log.e(BleScanner.TAG, "----> startScan");
                 Log.e(BleScanner.TAG, "filterUUID.length " + filterUUID.length);
+                /*
                 if (filterUUID.length > 0) {
                     Log.d(TAG, "uuids: " + Arrays.toString(filterUUID));
-                    //BleUtils.getAdapter(activity).startLeScan(filterUUID, leScanCallback);
+                    BleUtils.getAdapter(activity).startLeScan(filterUUID, leScanCallback);
                 } else {
-                    //BleUtils.getAdapter(activity).startLeScan(leScanCallback);
+                    BleUtils.getAdapter(activity).startLeScan(leScanCallback);
                 }
+                */
+
                 bluetoothLeScanner.startScan(scanFilterList, scanSettings, scanCallback);
 
 
@@ -246,9 +252,10 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
                     if (flutterScanningStatus != null)
                         flutterScanningStatus.success(false);
                 });
-                //BleUtils.getAdapter(activity).stopLeScan(leScanCallback);
-                bluetoothLeScanner.stopScan(scanCallback);
                 //BleUtils.getAdapter(activity).cancelDiscovery();
+                //BleUtils.getAdapter(activity).stopLeScan(leScanCallback);
+                bluetoothLeScanner.flushPendingScanResults(scanCallback);
+                bluetoothLeScanner.stopScan(scanCallback);
 
             } catch (Exception ignore) {
             }
@@ -266,8 +273,9 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
                     break;
                 case BluetoothProfile.STATE_DISCONNECTED:
                     Log.e(TAG, "newState: " + newState + " STATE_DISCONNECTED ✂️");
-                    bluetoothGatt.close();
                     activity.runOnUiThread(() -> flutterConnectedDevice.success(false));
+                    bluetoothGatt.close();
+                    gatt.close();
                     break;
             }
             super.onConnectionStateChange(gatt, status, newState);
@@ -276,6 +284,9 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             super.onServicesDiscovered(gatt, status);
+
+            //bluetoothGatt.requestMtu(500);
+
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 try {
                     JSONArray json = new JSONArray();
@@ -312,6 +323,11 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
                 } else {
                     Log.e(TAG, "connectGatt");
                     bluetoothGatt = bluetoothDevice.connectGatt(activity, false, bluetoothGattCallback);
+                }
+
+                bluetoothGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
+                if (Build.VERSION.SDK_INT >= 26) {
+                    bluetoothGatt.setPreferredPhy(1, 1, 0);
                 }
 
                 if (bluetoothGatt == null) {
@@ -614,7 +630,7 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
 
 
         scanSettings = new ScanSettings.Builder()
-                .setScanMode(ScanSettings.SCAN_MODE_BALANCED)
+                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
                 .build();
 
         bluetoothLeScanner = BleUtils.getLeScanner(activity);
