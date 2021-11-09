@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
+import android.location.SettingInjectorService;
 import android.os.Build;
 import android.os.ParcelUuid;
 import android.util.Log;
@@ -40,6 +41,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -237,6 +239,7 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
 
 
             } catch (Exception e) {
+                Log.e(TAG,"scan start error: "+e.getMessage());
                 onRadarScanError(BleRadarScanError.NOT_START_SCANNER);
             }
         });
@@ -262,6 +265,15 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
         }).start();
     }
 
+    public boolean gattRefresh() {
+        try {
+            Method method = bluetoothGatt.getClass().getMethod("refresh");
+            return ((Boolean) method.invoke(bluetoothGatt, new Object[0])).booleanValue();
+        } catch (Exception ignored) {
+        }
+        return false;
+    }
+
     final BluetoothGattCallback bluetoothGattCallback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -274,8 +286,9 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
                 case BluetoothProfile.STATE_DISCONNECTED:
                     Log.e(TAG, "newState: " + newState + " STATE_DISCONNECTED ✂️");
                     activity.runOnUiThread(() -> flutterConnectedDevice.success(false));
+
+                    gattRefresh();
                     bluetoothGatt.close();
-                    gatt.close();
                     break;
             }
             super.onConnectionStateChange(gatt, status, newState);
@@ -348,6 +361,7 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
         new ThreadBle(() -> {
             try {
 
+                gattRefresh();
                 bluetoothGatt.disconnect();
 
             } catch (Exception e) {
@@ -629,9 +643,9 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
         binding.addRequestPermissionsResultListener(this);
 
 
-        scanSettings = new ScanSettings.Builder()
-                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                .build();
+        ScanSettings.Builder builder = new ScanSettings.Builder()
+                .setScanMode(ScanSettings.SCAN_MODE_BALANCED);
+        scanSettings = builder.build();
 
         bluetoothLeScanner = BleUtils.getLeScanner(activity);
     }

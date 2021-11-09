@@ -1,6 +1,8 @@
 PODS:
   - ble_radar (0.0.3):
     - Flutter
+  - device_info (0.0.1):
+    - Flutter
   - Flutter (1.0.0)
   - MTBBarcodeScanner (5.0.11)
   - scan_preview (0.0.1):
@@ -9,6 +11,7 @@ PODS:
 
 DEPENDENCIES:
   - ble_radar (from `.symlinks/plugins/ble_radar/ios`)
+  - device_info (from `.symlinks/plugins/device_info/ios`)
   - Flutter (from `Flutter`)
   - scan_preview (from `.symlinks/plugins/scan_preview/ios`)
 
@@ -19,6 +22,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   ble_radar:
     :path: ".symlinks/plugins/ble_radar/ios"
+  device_info:
+    :path: ".symlinks/plugins/device_info/ios"
   Flutter:
     :path: Flutter
   scan_preview:
@@ -26,6 +31,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   ble_radar: ac6a09526551d54b043f08c2933a79c0cdaa4aa1
+  device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
   scan_preview: 7a4f12dd850422dd8dc693da7b74e0ddbf5f6647

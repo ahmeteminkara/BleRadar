@@ -72,7 +72,8 @@ class _ButtonsState extends State<Buttons> {
       _bluetoothDevice.value = device;
 
       //if (device.name != null && device.name.contains("XP2_")) {
-      if (device.rssi < 0 && device.rssi > -50) {
+      int limit = Platform.isAndroid ? -55 : -50;
+      if (device.rssi < 0 && device.rssi > limit) {
         bleRadar.stop();
         bleRadar.connectDevice();
         print("!!!!!!! device: ${device.toString()}");
@@ -103,12 +104,12 @@ class _ButtonsState extends State<Buttons> {
       bleRadar.disconnectDevice();
       _writeStatus.value = status;
 
-      Timer(Duration(seconds: 4), () {
+      Timer(Duration(seconds: 2), () {
         _writeStatus.value = null;
+        _bluetoothDevice.value = null;
+        _servicesUUID.value = null;
+        _isScanning.value = null;
       });
-      _bluetoothDevice.value = null;
-      _servicesUUID.value = null;
-      _isScanning.value = null;
 
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -139,34 +140,40 @@ class _ButtonsState extends State<Buttons> {
                 separatorBuilder: (context, index) => Divider(),
                 itemCount: _tiles.length),
           ),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-            _buttonStart,
-            _buttonStop,
-            //_buttonDisconnect,
-          ])
+          Container(
+            padding: EdgeInsets.all(10),
+            height: 130,
+            width: double.maxFinite,
+            child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+              _buttonStart,
+              SizedBox(width: 10),
+              _buttonStop,
+              //_buttonDisconnect,
+            ]),
+          )
         ],
       ),
     );
   }
 
-  get _buttonStart => IconButton(
-      icon: Icon(Icons.play_arrow),
-      onPressed: () {
-        start();
-      });
+  get _buttonStart => Expanded(
+        child: Container(
+            height: double.infinity,
+            child: ElevatedButton.icon(
+              label: Text("Tara"),
+              icon: Icon(Icons.play_arrow),
+              onPressed: () => bleRadar.start(maxRssi: -100, vibration: true, autoConnect: false, filterUUID: [uuidBleDvce]),
+            )),
+      );
 
-  void start() {
-    bleRadar.start(
-      maxRssi: -100,
-      vibration: true,
-      autoConnect: false,
-      filterUUID: [uuidBleDvce],
-    );
-  }
-
-  get _buttonStop => IconButton(
-        icon: Icon(Icons.pause),
-        onPressed: () => bleRadar.stop(),
+  get _buttonStop => Expanded(
+        child: Container(
+            height: double.infinity,
+            child: ElevatedButton.icon(
+              label: Text("Durdur"),
+              icon: Icon(Icons.pause),
+              onPressed: () => bleRadar.stop(),
+            )),
       );
 
   get _buttonDisconnect => IconButton(
