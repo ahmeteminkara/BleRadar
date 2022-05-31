@@ -29,10 +29,14 @@ class _ButtonsState extends State<Buttons> {
 
   String deviceName = "";
 
+  FocusNode textNode;
+  TextEditingController writeText = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     initBle();
+    textNode = FocusNode();
     getDeviceName();
   }
 
@@ -67,14 +71,14 @@ class _ButtonsState extends State<Buttons> {
       _isScanning.value = status;
     });
 
-    bleRadar.onDetectDevice.listen((BluetoothDevice device) {
+    bleRadar.onDetectDevice.listen((BluetoothDevice device) async {
       if (device == null) return;
       _bluetoothDevice.value = device;
 
       //if (device.name != null && device.name.contains("XP2_")) {
       int limit = Platform.isAndroid ? -55 : -50;
       if (device.rssi < 0 && device.rssi > limit) {
-        bleRadar.stop();
+       await bleRadar.stop();
         bleRadar.connectDevice();
         print("!!!!!!! device: ${device.toString()}");
       }
@@ -134,6 +138,11 @@ class _ButtonsState extends State<Buttons> {
       appBar: AppBar(title: Text("Ble Radar Kontrol")),
       body: Column(
         children: [
+          TextField(
+            controller: writeText,
+            focusNode: textNode,
+            decoration: InputDecoration(hintText: "Message..."),
+          ),
           Expanded(
             child: ListView.separated(
                 itemBuilder: (context, index) => _tiles.elementAt(index),
@@ -190,8 +199,13 @@ class _ButtonsState extends State<Buttons> {
       print("service uuid item: $item");
     }
 
+    if (writeText.text.isEmpty) {
+      textNode.requestFocus();
+      return;
+    }
+
     if (_servicesUUID.value.contains(uuidService) || _servicesUUID.value.contains(uuidService.toLowerCase())) {
-      bleRadar.writeCharacteristic(uuidService, uuidCharcts, deviceName);
+      bleRadar.writeCharacteristic(uuidService, uuidCharcts, writeText.text);
     } else {
       bleRadar.disconnectDevice();
       ScaffoldMessenger.of(context).hideCurrentSnackBar();

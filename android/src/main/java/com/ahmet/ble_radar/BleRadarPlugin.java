@@ -19,7 +19,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
-import android.location.SettingInjectorService;
 import android.os.Build;
 import android.os.ParcelUuid;
 import android.util.Log;
@@ -32,10 +31,6 @@ import com.ahmet.ble_module.listener.BleRadarErrorListener;
 import com.ahmet.ble_module.listener.BleRadarListener;
 import com.ahmet.ble_module.tools.BleUtils;
 import com.ahmet.ble_module.tools.ThreadBle;
-import com.ahmet.radar.BleScanner;
-import com.ahmet.radar.enums.BleDeviceErrors;
-import com.ahmet.radar.listener.BleScannerCallback;
-import com.ahmet.radar.thread.ScanResultThread;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,7 +38,6 @@ import org.json.JSONObject;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -137,7 +131,7 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
 
         @Override
         public void onBatchScanResults(List<ScanResult> results) {
-            Log.e(BleScanner.TAG, "onBatchScanResults");
+            Log.e(TAG, "onBatchScanResults");
         }
 
         @Override
@@ -145,19 +139,19 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
             onRadarScanError(BleRadarScanError.NOT_START_SCANNER);
             switch (errorCode) {
                 case SCAN_FAILED_ALREADY_STARTED:
-                    Log.e(BleScanner.TAG, "error SCAN_FAILED_ALREADY_STARTED");
+                    Log.e(TAG, "error SCAN_FAILED_ALREADY_STARTED");
                     break;
                 case SCAN_FAILED_APPLICATION_REGISTRATION_FAILED:
-                    Log.e(BleScanner.TAG, "error SCAN_FAILED_APPLICATION_REGISTRATION_FAILED");
+                    Log.e(TAG, "error SCAN_FAILED_APPLICATION_REGISTRATION_FAILED");
                     break;
                 case SCAN_FAILED_INTERNAL_ERROR:
-                    Log.e(BleScanner.TAG, "error SCAN_FAILED_INTERNAL_ERROR");
+                    Log.e(TAG, "error SCAN_FAILED_INTERNAL_ERROR");
                     break;
                 case SCAN_FAILED_FEATURE_UNSUPPORTED:
-                    Log.e(BleScanner.TAG, "error SCAN_FAILED_FEATURE_UNSUPPORTED");
+                    Log.e(TAG, "error SCAN_FAILED_FEATURE_UNSUPPORTED");
                     break;
                 default:
-                    Log.e(BleScanner.TAG, "onScanFailed errorCode " + errorCode);
+                    Log.e(TAG, "onScanFailed errorCode " + errorCode);
                     break;
             }
         }
@@ -224,8 +218,8 @@ public class BleRadarPlugin implements FlutterPlugin, MethodCallHandler, Activit
                         flutterScanningStatus.success(true);
                 });
 
-                Log.e(BleScanner.TAG, "----> startScan");
-                Log.e(BleScanner.TAG, "filterUUID.length " + filterUUID.length);
+                Log.e(TAG, "----> startScan");
+                Log.e(TAG, "filterUUID.length " + filterUUID.length);
                 /*
                 if (filterUUID.length > 0) {
                     Log.d(TAG, "uuids: " + Arrays.toString(filterUUID));
